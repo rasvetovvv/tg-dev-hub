@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+data
+dist
+.env
+.git
+.gitignore
+.github
+.codex
+.claude
+.agents
+.cursor
+.impeccable
+docs
+work
