@@ -14,12 +14,42 @@
       <feDropShadow dx="0" dy="28" stdDeviation="26" flood-color="#000000" flood-opacity="0.42"/>
     </filter>
     <style>
-      .title { font: 800 58px Inter, ui-sans-serif, system-ui, sans-serif; fill: #EEF1F7; }
-      .subtitle { font: 500 22px Inter, ui-sans-serif, system-ui, sans-serif; fill: #969DB1; }
-      .mono { font: 700 17px "JetBrains Mono", ui-monospace, monospace; fill: #FFB454; }
-      .label { font: 700 15px Inter, ui-sans-serif, system-ui, sans-serif; fill: #EEF1F7; }
-      .muted { font: 500 14px Inter, ui-sans-serif, system-ui, sans-serif; fill: #969DB1; }
-      .tiny { font: 700 11px "JetBrains Mono", ui-monospace, monospace; fill: #0B0D12; }
+      .title {
+        font-family: Inter, Arial, sans-serif;
+        font-size: 48px;
+        font-weight: 800;
+        fill: #EEF1F7;
+      }
+      .subtitle {
+        font-family: Inter, Arial, sans-serif;
+        font-size: 22px;
+        font-weight: 500;
+        fill: #969DB1;
+      }
+      .mono {
+        font-family: Consolas, "JetBrains Mono", monospace;
+        font-size: 17px;
+        font-weight: 700;
+        fill: #FFB454;
+      }
+      .label {
+        font-family: Inter, Arial, sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        fill: #EEF1F7;
+      }
+      .muted {
+        font-family: Inter, Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        fill: #969DB1;
+      }
+      .tiny {
+        font-family: Consolas, "JetBrains Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        fill: #0B0D12;
+      }
     </style>
   </defs>
   <rect width="1280" height="640" fill="url(#page)"/>
@@ -34,8 +64,8 @@
 
   <text class="mono" x="76" y="242">TELEGRAM MINI APP MARKETPLACE</text>
   <text class="title" x="76" y="316">Telegram Dev Hub</text>
-  <text class="subtitle" x="78" y="360">Sell scripts, bots, parsers and source code through Telegram Stars.</text>
-  <text class="subtitle" x="78" y="396">Built-in admin panel, author profiles, versioned files and moderation.</text>
+  <text class="subtitle" x="78" y="360">Sell scripts and source code with Telegram Stars.</text>
+  <text class="subtitle" x="78" y="396">Admin panel, author profiles and versioned files.</text>
 
   <g transform="translate(76 448)">
     <rect width="136" height="42" rx="12" fill="#FFB454"/>

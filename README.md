@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/icon.svg" width="104" alt="Telegram Dev Hub logo" />
+  <img src="docs/assets/icon.png" width="104" alt="Telegram Dev Hub logo" />
 </p>
 
 <h1 align="center">Telegram Dev Hub</h1>
@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/preview.svg" alt="Telegram Dev Hub preview" />
+  <img src="docs/assets/preview.png" alt="Telegram Dev Hub preview" />
 </p>
 
 ## Overview
