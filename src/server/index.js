@@ -426,12 +426,12 @@ function buildReadme(project) {
   return [
     `# ${project.title}`,
     project.summary || "",
-    project.description ? `## Описание\n${project.description}` : "",
-    project.installation ? `## Установка\n${project.installation}` : "",
-    project.requirements ? `## Требования\n${project.requirements}` : "",
-    project.runExamples ? `## Примеры запуска\n${project.runExamples}` : "",
+    project.description ? `## Description\n${project.description}` : "",
+    project.installation ? `## Installation\n${project.installation}` : "",
+    project.requirements ? `## Requirements\n${project.requirements}` : "",
+    project.runExamples ? `## Run Examples\n${project.runExamples}` : "",
     project.repositoryUrl ? `## GitHub\n${project.repositoryUrl}` : "",
-    `## Лицензия\n${project.licenseType || "free"}`
+    `## License\n${project.licenseType || "free"}`
   ].filter(Boolean).join("\n\n");
 }
 
@@ -615,8 +615,8 @@ async function notifyNewProject(project, creatorId = null) {
   const users = createNewProjectNotifications(project.id, creatorId);
   const telegram = await sendTelegramNotifications(
     users,
-    `Новый проект: ${project.title}`,
-    project.summary || "В каталоге появился новый проект."
+    `New project: ${project.title}`,
+    project.summary || "A new project appeared in the catalog."
   );
 
   return { notifications: users.length, ...telegram };
@@ -630,8 +630,8 @@ async function notifySavedProjectUpdate(project, version, changelog) {
   const users = listProjectFavoriteUsers(project.id);
   const telegram = await sendTelegramNotifications(
     users,
-    `Новая версия: ${project.title}`,
-    changelog || version || "Сохраненный проект получил обновление."
+    `New version: ${project.title}`,
+    changelog || version || "A saved project received an update."
   );
 
   return { notifications: users.length, ...telegram };
@@ -1019,7 +1019,7 @@ app.post("/api/admin/projects/:id/sale", requireAuth, requireAdmin, (req, res) =
 
 app.post("/api/admin/projects/:id/message", requireAuth, requireAdmin, async (req, res, next) => {
   try {
-    const title = String(req.body.title || "Сообщение от модератора").trim();
+    const title = String(req.body.title || "Message from moderator").trim();
     const message = String(req.body.message || "").trim();
     if (!message) {
       res.status(400).json({ error: "Message is required" });
@@ -1475,22 +1475,22 @@ async function startBot() {
       return;
     }
     completeStarsPayload(payment.invoice_payload);
-    await ctx.reply("Оплата через Telegram Stars прошла успешно. Доступ активирован.");
+    await ctx.reply("Telegram Stars payment completed. Access activated.");
   });
 
   if (false) {
   const openKeyboard = Markup.inlineKeyboard([
-    [Markup.button.webApp("Открыть Dev Hub", config.webAppUrl)]
+    [Markup.button.webApp("Open Dev Hub", config.webAppUrl)]
   ]);
 
   bot.start((ctx) =>
     ctx.reply(
-      "Dev Hub готов. Открывай каталог проектов через кнопку ниже.",
+      "Dev Hub is ready. Open the project catalog using the button below.",
       openKeyboard
     )
   );
-  bot.command("app", (ctx) => ctx.reply("Открыть WebApp:", openKeyboard));
-  bot.command("id", (ctx) => ctx.reply(`Ваш Telegram ID: ${ctx.from.id}`));
+  bot.command("app", (ctx) => ctx.reply("Open WebApp:", openKeyboard));
+  bot.command("id", (ctx) => ctx.reply(`Your Telegram ID: ${ctx.from.id}`));
 
   }
 

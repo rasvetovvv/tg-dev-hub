@@ -9,11 +9,11 @@ import { enrichProjects, getAccountState } from "./monetization.js";
 import { isAdminTelegramId } from "./security.js";
 
 const commandLabels = {
-  start: "Главное меню",
-  new: "Последние проекты",
-  top: "Популярные проекты",
-  saved: "Избранное",
-  profile: "Профиль"
+  start: "Main menu",
+  new: "Latest projects",
+  top: "Popular projects",
+  saved: "Saved",
+  profile: "Profile"
 };
 
 function escapeHtml(value) {
@@ -30,16 +30,16 @@ function trimText(value, max = 140) {
 }
 
 function formatProjectPrice(project) {
-  if (project.accessTier === "subscription") return "по подписке";
+  if (project.accessTier === "subscription") return "subscription";
   if (project.accessTier === "vip") return "VIP";
-  return project.priceCents > 0 || project.accessTier === "paid" ? `${Math.max(1, project.priceCents || 0)} Stars` : "бесплатно";
+  return project.priceCents > 0 || project.accessTier === "paid" ? `${Math.max(1, project.priceCents || 0)} Stars` : "free";
 }
 
 function formatProjectLine(project, index) {
   const meta = [
     project.version || "",
     formatProjectPrice(project),
-    `${project.downloadCount || 0} скач.`,
+    `${project.downloadCount || 0} downloads`,
     project.averageRating ? `${project.averageRating}/5` : ""
   ].filter(Boolean);
 
@@ -54,25 +54,25 @@ function formatProjectLine(project, index) {
 
 function openKeyboard(config) {
   return Markup.inlineKeyboard([
-    [Markup.button.webApp("Открыть WebApp", config.webAppUrl)],
+    [Markup.button.webApp("Open WebApp", config.webAppUrl)],
     [
-      Markup.button.callback("Последние", "bot:new"),
-      Markup.button.callback("Топ", "bot:top")
+      Markup.button.callback("Latest", "bot:new"),
+      Markup.button.callback("Top", "bot:top")
     ],
     [
-      Markup.button.callback("Избранное", "bot:saved"),
-      Markup.button.callback("Профиль", "bot:profile")
+      Markup.button.callback("Saved", "bot:saved"),
+      Markup.button.callback("Profile", "bot:profile")
     ]
   ]);
 }
 
 function listKeyboard(config) {
   return Markup.inlineKeyboard([
-    [Markup.button.webApp("Открыть каталог", config.webAppUrl)],
+    [Markup.button.webApp("Open catalog", config.webAppUrl)],
     [
-      Markup.button.callback("Последние", "bot:new"),
-      Markup.button.callback("Топ", "bot:top"),
-      Markup.button.callback("Избранное", "bot:saved")
+      Markup.button.callback("Latest", "bot:new"),
+      Markup.button.callback("Top", "bot:top"),
+      Markup.button.callback("Saved", "bot:saved")
     ]
   ]);
 }
@@ -105,8 +105,8 @@ export function buildProjectListPayload(mode, user, config) {
   const projects = getBotProjects(user.id, mode);
   const empty =
     mode === "saved"
-      ? "В избранном пока нет проектов. Открой WebApp и нажми звездочку на нужных проектах."
-      : "Проектов пока нет.";
+      ? "There are no saved projects yet. Open the WebApp and save projects you want to revisit."
+      : "No projects yet.";
   const body = projects.length
     ? projects.map(formatProjectLine).join("\n\n")
     : empty;
@@ -121,34 +121,34 @@ export function buildProfilePayload(user, config) {
   const account = getAccountState(user, config);
   const profile = getUserProfileStats(user.id);
   const globalStats = getStats();
-  const name = [user.first_name, user.last_name].filter(Boolean).join(" ") || user.username || "Пользователь";
+  const name = [user.first_name, user.last_name].filter(Boolean).join(" ") || user.username || "User";
   const access = account.isVip
     ? "VIP"
     : account.isSubscriber
-      ? "Подписка"
-      : "Обычный";
-  const remaining = account.unlimited ? "без лимита" : `${account.remaining}/${account.downloadLimit}`;
+      ? "Subscription"
+      : "Regular";
+  const remaining = account.unlimited ? "unlimited" : `${account.remaining}/${account.downloadLimit}`;
   const publicProfile = user.username
     ? `${String(config.webAppUrl || "").replace(/\/$/, "")}/${user.username}`
     : "";
 
   return {
     text: [
-      `<b>Профиль</b>`,
-      `Имя: ${escapeHtml(name)}`,
+      `<b>Profile</b>`,
+      `Name: ${escapeHtml(name)}`,
       user.username ? `Username: @${escapeHtml(user.username)}` : "",
-      `Верификация: ${user.is_verified ? "выдана" : "нет"}`,
+      `Verification: ${user.is_verified ? "granted" : "none"}`,
       `Telegram ID: <code>${escapeHtml(user.telegram_id)}</code>`,
-      `Доступ: ${escapeHtml(access)}`,
-      `Скачивания сегодня: ${escapeHtml(remaining)}`,
-      `Избранное: ${profile.favorites}`,
-      `Скачиваний: ${profile.downloads}`,
-      `Отзывов: ${profile.reviews}`,
-      `Новых уведомлений: ${profile.unreadNotifications}`,
-      isAdminTelegramId(user, config) ? "Роль: админ" : "",
-      publicProfile ? `Публичный профиль: ${escapeHtml(publicProfile)}` : "",
+      `Access: ${escapeHtml(access)}`,
+      `Downloads today: ${escapeHtml(remaining)}`,
+      `Saved: ${profile.favorites}`,
+      `Downloads: ${profile.downloads}`,
+      `Reviews: ${profile.reviews}`,
+      `Unread notifications: ${profile.unreadNotifications}`,
+      isAdminTelegramId(user, config) ? "Role: admin" : "",
+      publicProfile ? `Public profile: ${escapeHtml(publicProfile)}` : "",
       "",
-      `В каталоге: ${globalStats.projects} проектов`
+      `Catalog: ${globalStats.projects} projects`
     ]
       .filter((line) => line !== "")
       .join("\n"),
@@ -157,20 +157,20 @@ export function buildProfilePayload(user, config) {
 }
 
 export function buildStartPayload(user, config) {
-  const name = user.first_name || user.username || "разработчик";
+  const name = user.first_name || user.username || "developer";
 
   return {
     text: [
       `<b>Dev Hub</b>`,
-      `Привет, ${escapeHtml(name)}.`,
+      `Hi, ${escapeHtml(name)}.`,
       "",
-      "Здесь можно смотреть проекты, сохранять избранное, скачивать версии и получать уведомления об обновлениях.",
+      "Browse projects, save favorites, download versions and receive update notifications here.",
       "",
-      "<b>Команды</b>",
-      "/new - последние проекты",
-      "/top - популярные проекты",
-      "/saved - избранное",
-      "/profile - профиль"
+      "<b>Commands</b>",
+      "/new - latest projects",
+      "/top - popular projects",
+      "/saved - saved projects",
+      "/profile - profile"
     ].join("\n"),
     keyboard: openKeyboard(config)
   };
@@ -188,7 +188,7 @@ function withBotError(handler) {
       await handler(ctx);
     } catch (error) {
       console.error("Telegram bot command failed:", error);
-      await ctx.reply("Не удалось выполнить команду. Попробуйте еще раз.");
+      await ctx.reply("Could not run the command. Please try again.");
     }
   };
 }
@@ -214,7 +214,7 @@ export function registerBotCommands(bot, config) {
   bot.command("top", withBotError((ctx) => replyCommand(ctx, "top", config)));
   bot.command("saved", withBotError((ctx) => replyCommand(ctx, "saved", config)));
   bot.command("profile", withBotError((ctx) => replyCommand(ctx, "profile", config)));
-  bot.command("id", withBotError((ctx) => ctx.reply(`Ваш Telegram ID: ${ctx.from.id}`)));
+  bot.command("id", withBotError((ctx) => ctx.reply(`Your Telegram ID: ${ctx.from.id}`)));
 
   bot.action("bot:new", withBotError((ctx) => answerAction(ctx, "new", config)));
   bot.action("bot:top", withBotError((ctx) => answerAction(ctx, "top", config)));
@@ -224,18 +224,18 @@ export function registerBotCommands(bot, config) {
 
 export async function setBotCommandMenu(bot) {
   await bot.telegram.setMyCommands([
-    { command: "start", description: "Красивое меню" },
-    { command: "new", description: "Последние проекты" },
-    { command: "top", description: "Популярные проекты" },
-    { command: "saved", description: "Избранное" },
-    { command: "profile", description: "Профиль пользователя" }
+    { command: "start", description: "Main menu" },
+    { command: "new", description: "Latest projects" },
+    { command: "top", description: "Popular projects" },
+    { command: "saved", description: "Saved" },
+    { command: "profile", description: "User profile" }
   ]);
 }
 
 export function notificationKeyboard(config) {
   return {
     reply_markup: {
-      inline_keyboard: [[{ text: "Открыть WebApp", web_app: { url: config.webAppUrl } }]]
+      inline_keyboard: [[{ text: "Open WebApp", web_app: { url: config.webAppUrl } }]]
     }
   };
 }

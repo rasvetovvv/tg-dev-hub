@@ -1,6 +1,6 @@
 import { formatStarsPriceLabel, getDb, getUserByTelegramId } from "./db.js";
 
-// Monetization layer: access tiers, one-time purchases ("Купить исходник"),
+// Monetization layer: access tiers, one-time purchases ("Buy source"),
 // promo codes, subscriptions, paid VIP section, custom-development orders, and
 // daily download limits for regular users. Shares the same WAL database as db.js.
 
@@ -238,14 +238,14 @@ export function evaluateDownloadAccess(user, project, account) {
   if (hasPurchase(user.id, project.id)) return { allowed: true };
 
   if (tier === "paid") {
-    return { allowed: false, status: 402, reason: "need_purchase", message: "Сначала купите исходник проекта." };
+    return { allowed: false, status: 402, reason: "need_purchase", message: "Buy the project source first." };
   }
   if (tier === "vip") {
-    return { allowed: false, status: 402, reason: "need_vip", message: "Проект доступен только в VIP-разделе." };
+    return { allowed: false, status: 402, reason: "need_vip", message: "This project is available only in the VIP section." };
   }
   if (tier === "subscription") {
     if (account.isSubscriber) return { allowed: true };
-    return { allowed: false, status: 402, reason: "need_subscription", message: "Проект доступен по подписке." };
+    return { allowed: false, status: 402, reason: "need_subscription", message: "This project is available by subscription." };
   }
 
   // free tier: enforce the daily limit for regular users only
@@ -254,7 +254,7 @@ export function evaluateDownloadAccess(user, project, account) {
       allowed: false,
       status: 429,
       reason: "limit",
-      message: `Дневной лимит скачиваний исчерпан (${account.downloadLimit}/день). Оформите подписку или VIP для безлимита.`
+      message: `Daily download limit reached (${account.downloadLimit}/day). Subscribe or get VIP for unlimited downloads.`
     };
   }
   return { allowed: true };
@@ -330,7 +330,7 @@ export async function purchaseProject(user, projectId, config) {
     userId: user.id,
     projectId: project.id,
     type: "source",
-    message: `Заявка на покупку исходника: ${project.title}`
+    message: `Source purchase request: ${project.title}`
   });
   return { status: "pending", title: project.title };
 }
@@ -459,7 +459,7 @@ export async function subscribe(user, config) {
   createCustomRequest({
     userId: user.id,
     type: "subscription",
-    message: "Заявка на оформление подписки"
+    message: "Subscription request"
   });
   return { status: "pending" };
 }
@@ -479,7 +479,7 @@ export async function buyVip(user, config) {
   createCustomRequest({
     userId: user.id,
     type: "vip",
-    message: "Заявка на VIP-доступ"
+    message: "VIP access request"
   });
   return { status: "pending" };
 }
@@ -503,16 +503,16 @@ export function completeStarsPayload(payload) {
 
 export function grantByTelegramId(telegramId, kind, days) {
   const id = String(telegramId || "").trim();
-  if (!id) throw badRequest("Укажите Telegram ID.");
+  if (!id) throw badRequest("Enter Telegram ID.");
   const user = getUserByTelegramId(id);
-  if (!user) throw badRequest("Пользователь с таким Telegram ID не найден (он должен хотя бы раз открыть приложение).");
+  if (!user) throw badRequest("No user with this Telegram ID was found. They must open the app at least once.");
 
   if (kind === "vip") {
     grantVip(user.id, Number.parseInt(days, 10) || 0);
   } else if (kind === "subscription") {
     grantSubscription(user.id, Number.parseInt(days, 10) || 30);
   } else {
-    throw badRequest("Тип доступа должен быть vip или subscription.");
+    throw badRequest("Access type must be vip or subscription.");
   }
   return { ok: true };
 }
@@ -521,13 +521,13 @@ export function grantByTelegramId(telegramId, kind, days) {
 
 export function createPromoCode(body) {
   const code = String(body.code || "").trim();
-  if (code.length < 3) throw badRequest("Код должен быть не короче 3 символов.");
+  if (code.length < 3) throw badRequest("Code must be at least 3 characters long.");
 
   const type = String(body.type || "project").trim();
-  if (!PROMO_TYPES.has(type)) throw badRequest("Тип промокода должен быть project, subscription или vip.");
+  if (!PROMO_TYPES.has(type)) throw badRequest("Promo code type must be project, subscription or vip.");
 
   const projectId = type === "project" ? Number.parseInt(body.projectId, 10) || null : null;
-  if (type === "project" && !projectId) throw badRequest("Для промокода на проект укажите ID проекта.");
+  if (type === "project" && !projectId) throw badRequest("Enter a project ID for a project promo code.");
 
   const days = Number.parseInt(body.days, 10) || 0;
   const maxUses = Math.max(0, Number.parseInt(body.maxUses, 10) || 0);
@@ -573,28 +573,28 @@ export function deactivatePromoCode(id) {
 
 export function redeemPromo(user, codeInput, config) {
   const code = String(codeInput || "").trim();
-  if (!code) throw badRequest("Введите промокод.");
+  if (!code) throw badRequest("Enter promo code.");
 
   const db = getDb();
   const promo = db
     .prepare(`SELECT * FROM promo_codes WHERE code = ? COLLATE NOCASE`)
     .get(code);
 
-  if (!promo || !promo.is_active) throw badRequest("Промокод недействителен.");
+  if (!promo || !promo.is_active) throw badRequest("Promo code is invalid.");
   if (promo.expires_at) {
     const expired = db
       .prepare(`SELECT (expires_at <= datetime('now')) AS expired FROM promo_codes WHERE id = ?`)
       .get(promo.id)?.expired;
-    if (expired) throw badRequest("Срок действия промокода истёк.");
+    if (expired) throw badRequest("Promo code has expired.");
   }
   if (promo.max_uses > 0 && promo.used_count >= promo.max_uses) {
-    throw badRequest("Лимит активаций промокода исчерпан.");
+    throw badRequest("Promo code redemption limit has been reached.");
   }
 
   const alreadyUsed = db
     .prepare(`SELECT 1 FROM promo_redemptions WHERE promo_id = ? AND user_id = ?`)
     .get(promo.id, user.id);
-  if (alreadyUsed) throw badRequest("Вы уже активировали этот промокод.");
+  if (alreadyUsed) throw badRequest("You have already redeemed this promo code.");
 
   db.exec("BEGIN");
   try {
@@ -627,13 +627,13 @@ export function redeemPromo(user, codeInput, config) {
   };
 }
 
-/* ---------------- custom requests ("Заказать доработку") ---------------- */
+/* ---------------- custom requests ("Order customization") ---------------- */
 
 export function createCustomRequest({ userId, projectId = null, type = "custom", message = "", budget = "", contact = "" }) {
   const requestType = REQUEST_TYPES.has(type) ? type : "custom";
   const text = String(message || "").trim();
   if (!text && (requestType === "custom" || requestType === "source")) {
-    throw badRequest("Опишите задачу в сообщении.");
+    throw badRequest("Describe the task in the message.");
   }
 
   getDb()

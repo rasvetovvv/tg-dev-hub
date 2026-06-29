@@ -271,7 +271,7 @@ try {
     changelog: "v1.0.0 initial",
     languages: ["Node.js", "Python"],
     tags: ["fullcheck", "api", "bot"],
-    collections: ["Боты", "AI"],
+    collections: ["Bots", "AI"],
     categories: ["Backend", "Automation"],
     repositoryUrl: "https://example.com/repo",
     demoUrl: "https://example.com/demo",
@@ -287,7 +287,7 @@ try {
       title: "Full Check Free",
       slug: slugs.free,
       priceCents: 0,
-      priceLabel: "Бесплатно",
+      priceLabel: "Free",
       accessTier: "free"
     },
     {
@@ -330,7 +330,7 @@ try {
       title: "Full Check Subscription",
       slug: slugs.subscription,
       priceCents: 0,
-      priceLabel: "По подписке",
+      priceLabel: "Subscription",
       accessTier: "subscription"
     },
     { package: { name: "sub.js", body: "console.log('sub');" } }
@@ -725,8 +725,8 @@ try {
   assert(botTop.text.includes("Full Check Free"), "bot /top did not reflect real downloads");
   assert(
     botProfile.text.includes(users.main) &&
-      botProfile.text.includes("Избранное: 1") &&
-      botProfile.text.includes("Скачиваний: 5"),
+      botProfile.text.includes("Saved: 1") &&
+      botProfile.text.includes("Downloads: 5"),
     "bot /profile did not reflect real account stats"
   );
   ok("bot /top /profile payloads");

@@ -56,10 +56,10 @@ function fileSignaturePathFor(file) {
 export function formatStarsPriceLabel(accessTier, priceCents = 0) {
   const tier = String(accessTier || "free");
   const stars = Math.max(0, Number.parseInt(priceCents, 10) || 0);
-  if (tier === "subscription") return "По подписке";
+  if (tier === "subscription") return "Subscription";
   if (tier === "vip") return "VIP";
   if (tier === "paid" || stars > 0) return `${Math.max(1, stars)} Stars`;
-  return "Бесплатно";
+  return "Free";
 }
 
 function screenshotPathFor(file) {
@@ -185,11 +185,11 @@ function buildReadmePreview(project) {
   return [
     `# ${project.title || "Project"}`,
     project.summary || "",
-    project.description ? `## Описание\n${project.description}` : "",
-    project.installation ? `## Установка\n${project.installation}` : "",
-    project.requirements ? `## Требования\n${project.requirements}` : "",
-    project.run_examples ? `## Примеры запуска\n${project.run_examples}` : "",
-    `## Лицензия\n${project.license_type || "free"}`
+    project.description ? `## Description\n${project.description}` : "",
+    project.installation ? `## Installation\n${project.installation}` : "",
+    project.requirements ? `## Requirements\n${project.requirements}` : "",
+    project.run_examples ? `## Run Examples\n${project.run_examples}` : "",
+    `## License\n${project.license_type || "free"}`
   ].filter(Boolean).join("\n\n");
 }
 
@@ -721,7 +721,7 @@ export function initDatabase(config) {
       AND (
         UPPER(COALESCE(price_label, '')) LIKE '%RUB%'
         OR COALESCE(price_label, '') LIKE '%₽%'
-        OR LOWER(COALESCE(price_label, '')) LIKE '%руб%'
+        OR LOWER(COALESCE(price_label, '')) LIKE '%\u0440\u0443\u0431%'
       );
 
     UPDATE projects
@@ -746,11 +746,11 @@ export function initDatabase(config) {
 
     UPDATE projects
     SET price_label = CASE
-      WHEN COALESCE(access_tier, 'free') = 'subscription' THEN 'По подписке'
+      WHEN COALESCE(access_tier, 'free') = 'subscription' THEN 'Subscription'
       WHEN COALESCE(access_tier, 'free') = 'vip' THEN 'VIP'
       WHEN COALESCE(price_cents, 0) > 0 OR COALESCE(access_tier, 'free') = 'paid'
         THEN CAST(CASE WHEN COALESCE(price_cents, 0) > 0 THEN price_cents ELSE 1 END AS TEXT) || ' Stars'
-      ELSE 'Бесплатно'
+      ELSE 'Free'
     END;
   `);
 }
@@ -1828,8 +1828,8 @@ export function createNewProjectNotifications(projectId, excludeUserId = null) {
     insertNotification.run({
       userId: user.id,
       projectId,
-      title: `Новый проект: ${project.title}`,
-      body: project.summary || "В каталоге появился новый проект."
+      title: `New project: ${project.title}`,
+      body: project.summary || "A new project appeared in the catalog."
     });
   }
 
@@ -1854,7 +1854,7 @@ export function publishProjectVersion(projectId, version, changelog, file, creat
   if (!project) return null;
 
   const date = new Date().toISOString().slice(0, 10);
-  const entry = [`${version || "Новая версия"} · ${date}`, changelog]
+  const entry = [`${version || "New version"} · ${date}`, changelog]
     .filter(Boolean)
     .join("\n");
   const nextChangelog = [entry, project.changelog || ""].filter(Boolean).join("\n\n");
@@ -1914,8 +1914,8 @@ export function publishProjectVersion(projectId, version, changelog, file, creat
       insertNotification.run(
         favorite.id,
         projectId,
-        `Новая версия: ${project.title}`,
-        changelog || version || "Проект получил обновление."
+        `New version: ${project.title}`,
+        changelog || version || "Project received an update."
       );
     }
   }
@@ -2057,7 +2057,7 @@ export function createAuthorProjectNotification(projectId, title, body) {
   ).run(
     project.user_id,
     projectId,
-    title || `Сообщение по проекту: ${project.project_title}`,
+    title || `Project message: ${project.project_title}`,
     body || ""
   );
 

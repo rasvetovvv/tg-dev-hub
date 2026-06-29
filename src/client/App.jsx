@@ -53,7 +53,7 @@ import {
 import { api, setAuthToken } from "./api.js";
 
 const emptyNotice = { type: "", text: "" };
-const collectionPresets = ["Боты", "Парсеры", "Автоматизация", "AI"];
+const collectionPresets = ["Bots", "Parsers", "Automation", "AI"];
 const quickFilters = [
   "Python",
   "Node.js",
@@ -69,38 +69,38 @@ const licenseLabels = {
   commercial: "Commercial"
 };
 const statusLabels = {
-  draft: "Черновик",
-  pending: "На проверке",
-  published: "Опубликован",
-  hidden: "Скрыт",
-  archived: "Архив"
+  draft: "Draft",
+  pending: "Pending review",
+  published: "Published",
+  hidden: "Hidden",
+  archived: "Archive"
 };
 const tierLabels = {
   free: "Free",
-  paid: "Платный",
-  subscription: "Подписка",
+  paid: "Paid",
+  subscription: "Subscription",
   vip: "VIP"
 };
 const reportReasonLabels = {
-  malware: "Вредоносный код",
-  broken: "Не скачивается",
-  outdated: "Устарело",
-  abuse: "Нарушение",
-  support: "Нет поддержки",
-  author: "Жалоба на автора",
-  other: "Другое"
+  malware: "Malicious code",
+  broken: "Download does not work",
+  outdated: "Outdated",
+  abuse: "Violation",
+  support: "No support",
+  author: "Author report",
+  other: "Other"
 };
 const reportStatusLabels = {
-  new: "Новая",
-  reviewing: "Проверяется",
-  resolved: "Решена",
-  rejected: "Отклонена"
+  new: "New",
+  reviewing: "In review",
+  resolved: "Resolved",
+  rejected: "Rejected"
 };
 const scanStatusLabels = {
-  clean: "Проверен",
-  warning: "Предупреждение",
-  blocked: "Заблокирован",
-  pending: "Ожидает проверки"
+  clean: "Approved",
+  warning: "Warning",
+  blocked: "Blocked",
+  pending: "Pending review"
 };
 
 // Decide what the primary action on a project should be for the current viewer.
@@ -112,19 +112,19 @@ function accessState(project, account) {
     account.isVip ||
     (tier === "subscription" && account.isSubscriber);
 
-  if (unlocked) return { unlocked: true, action: "download", label: "Скачать", tier };
+  if (unlocked) return { unlocked: true, action: "download", label: "Download", tier };
   if (tier === "paid") {
     return {
       unlocked: false,
       action: "purchase",
-      label: `Купить · ${formatPrice(project)}`,
+      label: `Buy · ${formatPrice(project)}`,
       tier
     };
   }
   if (tier === "subscription") {
-    return { unlocked: false, action: "subscribe", label: "Открыть по подписке", tier };
+    return { unlocked: false, action: "subscribe", label: "Unlock with subscription", tier };
   }
-  return { unlocked: false, action: "vip", label: "Получить VIP-доступ", tier };
+  return { unlocked: false, action: "vip", label: "Get VIP access", tier };
 }
 
 function formatBytes(value) {
@@ -141,7 +141,7 @@ function formatBytes(value) {
 
 function formatDate(value) {
   if (!value) return "";
-  return new Intl.DateTimeFormat("ru", {
+  return new Intl.DateTimeFormat("en", {
     day: "2-digit",
     month: "short",
     year: "numeric"
@@ -149,12 +149,12 @@ function formatDate(value) {
 }
 
 function formatPrice(project) {
-  if (project.accessTier === "subscription") return "По подписке";
+  if (project.accessTier === "subscription") return "Subscription";
   if (project.accessTier === "vip") return "VIP";
   if (project.isOnSale && project.salePriceCents > 0) return `${project.salePriceCents} Stars · -${project.salePercent}%`;
   return project.priceCents > 0 || project.accessTier === "paid"
     ? `${Math.max(1, Number(project.priceCents) || 0)} Stars`
-    : "Бесплатно";
+    : "Free";
 }
 
 function publicUserLink(username) {
@@ -278,18 +278,18 @@ export default function App() {
 
   const visibleTabs = useMemo(() => {
     const tabs = [
-      { id: "catalog", label: "Каталог" },
-      { id: "top", label: "Топ" },
+      { id: "catalog", label: "Catalog" },
+      { id: "top", label: "Top" },
       { id: "vip", label: "VIP" },
-      { id: "saved", label: "Избранное" },
-      { id: "account", label: "Аккаунт" },
-      { id: "history", label: "История" },
+      { id: "saved", label: "Saved" },
+      { id: "account", label: "Account" },
+      { id: "history", label: "History" },
       {
         id: "notifications",
-        label: unreadCount ? `Уведомления ${unreadCount}` : "Уведомления"
+        label: unreadCount ? `Notifications ${unreadCount}` : "Notifications"
       }
     ];
-    if (user?.isAdmin) tabs.push({ id: "admin", label: "Админ" });
+    if (user?.isAdmin) tabs.push({ id: "admin", label: "Admin" });
     return tabs;
   }, [user, unreadCount]);
 
@@ -504,7 +504,7 @@ export default function App() {
         if (status === "paid") {
           await loadMe();
           await loadProjects();
-          setNotice({ type: "success", text: "Оплата Stars прошла успешно. Доступ обновлен." });
+          setNotice({ type: "success", text: "Stars payment completed. Access updated." });
         }
       });
       return;
@@ -514,7 +514,7 @@ export default function App() {
 
   async function archiveProject(projectId) {
     await api(`/api/projects/${projectId}`, { method: "DELETE" });
-    setNotice({ type: "success", text: "Проект отправлен в архив." });
+    setNotice({ type: "success", text: "Project archived." });
     await refreshAdminData();
   }
 
@@ -530,7 +530,7 @@ export default function App() {
         body: formData
       });
       form.reset();
-      setNotice({ type: "success", text: `Сохранено: ${payload.project.title}` });
+      setNotice({ type: "success", text: `Saved: ${payload.project.title}` });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -548,7 +548,7 @@ export default function App() {
         body: formData
       });
       form.reset();
-      setNotice({ type: "success", text: `Версия обновлена: ${payload.project.title}` });
+      setNotice({ type: "success", text: `Version updated: ${payload.project.title}` });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -565,7 +565,7 @@ export default function App() {
         method: "PUT",
         body: formData
       });
-      setNotice({ type: "success", text: `Изменения сохранены: ${payload.project.title}` });
+      setNotice({ type: "success", text: `Changes saved: ${payload.project.title}` });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -578,7 +578,7 @@ export default function App() {
         method: "POST",
         body: { status }
       });
-      setNotice({ type: "success", text: `Статус обновлен: ${statusLabels[status] || status}` });
+      setNotice({ type: "success", text: `Status updated: ${statusLabels[status] || status}` });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -593,7 +593,7 @@ export default function App() {
       });
       setNotice({
         type: "success",
-        text: project.pinnedAt ? "Проект откреплен." : "Проект закреплен наверху каталога."
+        text: project.pinnedAt ? "Project unpinned." : "Project pinned to the top of the catalog."
       });
       await refreshAdminData();
     } catch (error) {
@@ -612,7 +612,7 @@ export default function App() {
         body: formData
       });
       form.reset();
-      setNotice({ type: "success", text: "Файлы добавлены к проекту." });
+      setNotice({ type: "success", text: "Files added to the project." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -630,7 +630,7 @@ export default function App() {
         body: formData
       });
       form.reset();
-      setNotice({ type: "success", text: "Скриншоты обновлены." });
+      setNotice({ type: "success", text: "Screenshots updated." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -642,7 +642,7 @@ export default function App() {
       await api(`/api/projects/${project.id}/screenshots/${screenshot.id}`, {
         method: "DELETE"
       });
-      setNotice({ type: "success", text: "Скриншот удален." });
+      setNotice({ type: "success", text: "Screenshot deleted." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -660,8 +660,8 @@ export default function App() {
       setNotice({
         type: "success",
         text: payload.project.status === "pending"
-          ? "Правки отправлены на проверку."
-          : "Проект обновлен."
+          ? "Changes were sent for review."
+          : "Project updated."
       });
       await refreshAccountData();
     } catch (error) {
@@ -681,8 +681,8 @@ export default function App() {
       setNotice({
         type: "success",
         text: payload.project.status === "pending"
-          ? "Версия загружена и ждет проверки."
-          : "Версия опубликована."
+          ? "Version uploaded and waiting for review."
+          : "Version published."
       });
       await refreshAccountData();
     } catch (error) {
@@ -699,7 +699,7 @@ export default function App() {
         body: new FormData(form)
       });
       form.reset();
-      setNotice({ type: "success", text: "Скриншоты обновлены." });
+      setNotice({ type: "success", text: "Screenshots updated." });
       await refreshAccountData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -709,7 +709,7 @@ export default function App() {
   async function deleteOwnerScreenshot(project, screenshot) {
     try {
       await api(`/api/projects/${project.id}/screenshots/${screenshot.id}`, { method: "DELETE" });
-      setNotice({ type: "success", text: "Скриншот удален." });
+      setNotice({ type: "success", text: "Screenshot deleted." });
       await refreshAccountData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -721,7 +721,7 @@ export default function App() {
     body[badge] = !userItem[badge === "topSeller" ? "isTopSeller" : badge === "trusted" ? "isTrusted" : "isVerified"];
     try {
       await api(`/api/admin/users/${userItem.id}/badges`, { method: "POST", body });
-      setNotice({ type: "success", text: "Бейдж обновлен." });
+      setNotice({ type: "success", text: "Badge updated." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -734,7 +734,7 @@ export default function App() {
         method: "POST",
         body: { picked: !project.isWeeklyPick }
       });
-      setNotice({ type: "success", text: project.isWeeklyPick ? "Убрано из подборки недели." : "Добавлено в подборку недели." });
+      setNotice({ type: "success", text: project.isWeeklyPick ? "Removed from weekly picks." : "Added to weekly picks." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -746,7 +746,7 @@ export default function App() {
     const body = Object.fromEntries(new FormData(event.currentTarget));
     try {
       await api(`/api/admin/projects/${project.id}/sale`, { method: "POST", body });
-      setNotice({ type: "success", text: "Сезонная скидка обновлена." });
+      setNotice({ type: "success", text: "Seasonal sale updated." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -760,7 +760,7 @@ export default function App() {
     try {
       await api(`/api/admin/projects/${project.id}/message`, { method: "POST", body });
       form.reset();
-      setNotice({ type: "success", text: "Сообщение автору отправлено." });
+      setNotice({ type: "success", text: "Message sent to the author." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -779,7 +779,7 @@ export default function App() {
       : `/api/admin/projects/${project.id}/files/${item.id}/review`;
     try {
       await api(path, { method: "POST", body });
-      setNotice({ type: "success", text: "Ревью файла сохранено." });
+      setNotice({ type: "success", text: "File review saved." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -792,7 +792,7 @@ export default function App() {
       : `/api/admin/projects/${project.id}/files/${item.id}/hidden`;
     try {
       await api(path, { method: "POST", body: { hidden: !item.isHidden } });
-      setNotice({ type: "success", text: item.isHidden ? "Файл показан." : "Файл скрыт." });
+      setNotice({ type: "success", text: item.isHidden ? "File shown." : "File hidden." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -805,7 +805,7 @@ export default function App() {
       : `/api/admin/projects/${project.id}/files/${item.id}`;
     try {
       await api(path, { method: "DELETE" });
-      setNotice({ type: "success", text: "Файл удален." });
+      setNotice({ type: "success", text: "File deleted." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -824,7 +824,7 @@ export default function App() {
         method: "POST",
         body: { banned, reason }
       });
-      setNotice({ type: "success", text: banned ? "Пользователь забанен." : "Пользователь разбанен." });
+      setNotice({ type: "success", text: banned ? "User banned." : "User unbanned." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -839,7 +839,7 @@ export default function App() {
       });
       setNotice({
         type: "success",
-        text: userItem.isVerified ? "Верификация снята." : "Пользователь верифицирован."
+        text: userItem.isVerified ? "Verification removed." : "User verified."
       });
       await refreshAdminData();
     } catch (error) {
@@ -853,7 +853,7 @@ export default function App() {
         method: "POST",
         body: { status }
       });
-      setNotice({ type: "success", text: status === "hidden" ? "Отзыв скрыт." : "Отзыв опубликован." });
+      setNotice({ type: "success", text: status === "hidden" ? "Review hidden." : "Review published." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -863,7 +863,7 @@ export default function App() {
   async function removeReview(review) {
     try {
       await api(`/api/admin/reviews/${review.id}`, { method: "DELETE" });
-      setNotice({ type: "success", text: "Отзыв удален." });
+      setNotice({ type: "success", text: "Review deleted." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -876,7 +876,7 @@ export default function App() {
         method: "POST",
         body: { status, subjectType: report.subjectType || "project" }
       });
-      setNotice({ type: "success", text: "Статус жалобы обновлен." });
+      setNotice({ type: "success", text: "Report status updated." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -896,7 +896,7 @@ export default function App() {
       form.reset();
       setNotice({
         type: "success",
-        text: `Рассылка создана: ${payload.notifications} уведомлений, Telegram: ${payload.telegramSent} отправлено.`
+        text: `Broadcast created: ${payload.notifications} notifications, Telegram: ${payload.telegramSent} sent.`
       });
       await refreshAdminData();
     } catch (error) {
@@ -916,7 +916,7 @@ export default function App() {
       });
       form.reset();
       setSelected(payload.project);
-      setDetailNotice({ type: "success", text: "Отзыв сохранен." });
+      setDetailNotice({ type: "success", text: "Review saved." });
       await loadProjects();
       await loadMe();
     } catch (error) {
@@ -935,7 +935,7 @@ export default function App() {
         body
       });
       form.reset();
-      setDetailNotice({ type: "success", text: "Жалоба отправлена." });
+      setDetailNotice({ type: "success", text: "Report sent." });
       await loadMe();
     } catch (error) {
       setDetailNotice({ type: "error", text: error.message });
@@ -952,7 +952,7 @@ export default function App() {
         body
       });
       form.reset();
-      setNotice({ type: "success", text: "Жалоба на автора отправлена." });
+      setNotice({ type: "success", text: "Author report sent." });
     } catch (error) {
       setNotice({ type: "error", text: error.message });
     }
@@ -989,7 +989,7 @@ export default function App() {
       ) {
         setNotice({
           type: "error",
-          text: `Лимит ${account.downloadLimit} скачиваний на сегодня исчерпан. Оформите подписку или VIP для безлимита.`
+          text: `Limit ${account.downloadLimit} downloads for today is exhausted. Subscribe or get VIP for unlimited downloads.`
         });
         setActiveTab("account");
         return;
@@ -1014,13 +1014,13 @@ export default function App() {
       const result = await api(`/api/projects/${project.id}/purchase`, { method: "POST" });
       if (result.status === "paid" || result.status === "owned") {
         markOwned(project.id);
-        setDetailNotice({ type: "success", text: "Доступ открыт — теперь можно скачать." });
-        setNotice({ type: "success", text: `Куплено: ${project.title}` });
+        setDetailNotice({ type: "success", text: "Access unlocked. You can download now." });
+        setNotice({ type: "success", text: `Purchased: ${project.title}` });
       } else if (result.status === "invoice" && result.invoiceUrl) {
         openStarsInvoice(result.invoiceUrl);
-        setDetailNotice({ type: "success", text: "Открыл оплату через Telegram Stars." });
+        setDetailNotice({ type: "success", text: "Opened Telegram Stars checkout." });
       } else if (result.status === "pending") {
-        const text = "Заявка на покупку создана. Мы свяжемся для оплаты.";
+        const text = "Purchase request created. We will contact you about payment.";
         setDetailNotice({ type: "success", text });
         setNotice({ type: "success", text });
       } else if (result.status === "free") {
@@ -1044,7 +1044,7 @@ export default function App() {
       else await loadMe();
       setNotice({
         type: "success",
-        text: result.status === "active" ? "Подписка активирована." : "Открыл оплату подписки через Stars."
+        text: result.status === "active" ? "Subscription activated." : "Opened subscription checkout via Stars."
       });
       if (["catalog", "saved", "top", "vip"].includes(activeTab)) await loadProjects();
     } catch (error) {
@@ -1062,7 +1062,7 @@ export default function App() {
       else await loadMe();
       setNotice({
         type: "success",
-        text: result.status === "active" ? "VIP-доступ активирован." : "Открыл оплату VIP через Stars."
+        text: result.status === "active" ? "VIP access activated." : "Opened VIP checkout via Stars."
       });
       if (["catalog", "saved", "top", "vip"].includes(activeTab)) await loadProjects();
     } catch (error) {
@@ -1078,7 +1078,7 @@ export default function App() {
       const result = await api("/api/promo/redeem", { method: "POST", body: { code } });
       if (result.account) setAccount(result.account);
       form.reset();
-      setNotice({ type: "success", text: "Промокод активирован." });
+      setNotice({ type: "success", text: "Promo code redeemed." });
       await loadMe();
       if (["catalog", "saved", "top", "vip"].includes(activeTab)) await loadProjects();
     } catch (error) {
@@ -1095,7 +1095,7 @@ export default function App() {
     try {
       await api("/api/requests", { method: "POST", body });
       form.reset();
-      const text = "Заявка отправлена. Мы свяжемся с вами.";
+      const text = "Request sent. We will contact you.";
       setNotice({ type: "success", text });
       setDetailNotice({ type: "success", text });
     } catch (error) {
@@ -1117,8 +1117,8 @@ export default function App() {
       setNotice({
         type: "success",
         text: payload.autoApproved
-          ? `Проект опубликован: ${payload.project.title}.`
-          : `Заявка отправлена: ${payload.project.title}. Админ проверит и опубликует проект.`
+          ? `Project published: ${payload.project.title}.`
+          : `Submission sent: ${payload.project.title}. Admin will review and publish the project.`
       });
       await refreshAccountData();
     } catch (error) {
@@ -1133,7 +1133,7 @@ export default function App() {
     try {
       await api("/api/admin/promo", { method: "POST", body });
       form.reset();
-      setNotice({ type: "success", text: "Промокод создан." });
+      setNotice({ type: "success", text: "Promo code created." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -1143,7 +1143,7 @@ export default function App() {
   async function deactivatePromo(code) {
     try {
       await api(`/api/admin/promo/${code.id}`, { method: "DELETE" });
-      setNotice({ type: "success", text: "Промокод отключен." });
+      setNotice({ type: "success", text: "Promo code disabled." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -1162,7 +1162,7 @@ export default function App() {
   async function confirmPurchase(purchase) {
     try {
       await api(`/api/admin/purchases/${purchase.id}/confirm`, { method: "POST" });
-      setNotice({ type: "success", text: "Покупка подтверждена." });
+      setNotice({ type: "success", text: "Purchase confirmed." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -1176,7 +1176,7 @@ export default function App() {
     try {
       await api("/api/admin/grant", { method: "POST", body });
       form.reset();
-      setNotice({ type: "success", text: "Доступ выдан пользователю." });
+      setNotice({ type: "success", text: "Access granted to user." });
       await refreshAdminData();
     } catch (error) {
       setNotice({ type: "error", text: error.message });
@@ -1202,8 +1202,8 @@ export default function App() {
           <Code2 size={34} />
           <h1>Dev Hub</h1>
           <p>
-            WebApp должен открываться из Telegram-бота. Для локального режима
-            проверь `ALLOW_DEV_AUTH=true`.
+            The WebApp should be opened from the Telegram bot. For local mode,
+            check `ALLOW_DEV_AUTH=true`.
           </p>
           <span>{authError}</span>
         </div>
@@ -1228,7 +1228,7 @@ export default function App() {
           </span>
           <div>
             <strong>Dev Hub</strong>
-            <small>~/проекты · скрипты · исходники</small>
+            <small>~/projects · scripts · source</small>
           </div>
         </div>
 
@@ -1243,15 +1243,15 @@ export default function App() {
             {user.photoUrl ? <img src={user.photoUrl} alt="" /> : <User size={17} />}
           </span>
           <span className="profileName">
-            {user.firstName || user.username || "Аккаунт"}
+            {user.firstName || user.username || "Account"}
           </span>
         </div>
       </header>
 
-      <section className="statsStrip" aria-label="Статистика">
-        <Stat label="проектов" value={stats.projects} />
-        <Stat label="людей" value={stats.users} />
-        <Stat label="скачиваний" value={stats.downloads} />
+      <section className="statsStrip" aria-label="Statistics">
+        <Stat label="projects" value={stats.projects} />
+        <Stat label="users" value={stats.users} />
+        <Stat label="downloads" value={stats.downloads} />
       </section>
 
       {["catalog", "top", "vip", "saved"].includes(activeTab) && (
@@ -1279,7 +1279,7 @@ export default function App() {
         />
       )}
 
-      <nav className="tabs" aria-label="Разделы" ref={tabsRef}>
+      <nav className="tabs" aria-label="Sections" ref={tabsRef}>
         <span
           className="tabIndicator"
           aria-hidden="true"
@@ -1464,7 +1464,7 @@ function FilterPanel({
           <input
             value={search}
             onChange={(event) => onSearch(event.target.value)}
-            placeholder="Поиск проектов, языков, тегов"
+            placeholder="Search projects, languages, tags"
           />
         </div>
         <button
@@ -1474,7 +1474,7 @@ function FilterPanel({
           aria-expanded={open}
         >
           <ListFilter size={16} />
-          Фильтры
+          Filters
           {activeCount > 0 && <span className="filterCount">{activeCount}</span>}
         </button>
       </div>
@@ -1483,7 +1483,7 @@ function FilterPanel({
         <div className="filterBody">
           <div className="controls">
             <select value={language} onChange={(event) => onLanguage(event.target.value)}>
-          <option value="">Все языки</option>
+          <option value="">All languages</option>
           {filterOptions.languages.map((item) => (
             <option value={item} key={item}>
               {item}
@@ -1492,7 +1492,7 @@ function FilterPanel({
         </select>
 
         <select value={category} onChange={(event) => onCategory(event.target.value)}>
-          <option value="">Все категории</option>
+          <option value="">All categories</option>
           {filterOptions.categories.map((item) => (
             <option value={item} key={item}>
               {item}
@@ -1501,39 +1501,39 @@ function FilterPanel({
         </select>
 
         <select value={price} onChange={(event) => onPrice(event.target.value)}>
-          <option value="">Любая цена</option>
-          <option value="free">Бесплатные</option>
-          <option value="paid">Платные</option>
+          <option value="">Any price</option>
+          <option value="free">Free</option>
+          <option value="paid">Paid</option>
         </select>
 
         <select value={license} onChange={(event) => onLicense(event.target.value)}>
-          <option value="">Любая лицензия</option>
+          <option value="">Any license</option>
           <option value="free">Free</option>
           <option value="personal">Personal</option>
           <option value="commercial">Commercial</option>
         </select>
 
         <select value={date} onChange={(event) => onDate(event.target.value)}>
-          <option value="">Любая дата</option>
-          <option value="today">Сегодня</option>
-          <option value="week">7 дней</option>
-          <option value="month">30 дней</option>
-          <option value="year">Год</option>
+          <option value="">Any date</option>
+          <option value="today">Today</option>
+          <option value="week">7 days</option>
+          <option value="month">30 days</option>
+          <option value="year">Year</option>
         </select>
 
         <select value={sort} onChange={(event) => onSort(event.target.value)}>
-          <option value="new">Новые</option>
-          <option value="updated">Обновленные</option>
-          <option value="popular">Популярные</option>
-          <option value="rating">По рейтингу</option>
-          <option value="price">По цене</option>
+          <option value="new">Newest</option>
+          <option value="updated">Updated</option>
+          <option value="popular">Popular</option>
+          <option value="rating">By rating</option>
+          <option value="price">By price</option>
         </select>
       </div>
 
       <div className="quickFilters">
         <span>
           <FolderKanban size={15} />
-          Коллекции
+          Collections
         </span>
         {collections.map((item) => (
           <button
@@ -1550,7 +1550,7 @@ function FilterPanel({
       <div className="quickFilters">
         <span>
           <ListFilter size={15} />
-          Фильтры
+          Filters
         </span>
         {quickFilters.map((item) => (
           <button
@@ -1563,7 +1563,7 @@ function FilterPanel({
           </button>
         ))}
         <button type="button" className="ghostFilter" onClick={onReset}>
-          Сбросить
+          Reset
         </button>
       </div>
         </div>
@@ -1591,21 +1591,21 @@ function Catalog({ loading, projects, activeTab, account, onSelect, onFavorite, 
           <Star size={26} />
           <h2>
             {activeTab === "saved"
-              ? "Сохраненных пока нет"
+              ? "No saved projects yet"
               : activeTab === "top"
-                ? "Топ пока пуст"
+                ? "Top is empty"
                 : activeTab === "vip"
-                  ? "VIP-проектов пока нет"
-                  : "Каталог пуст"}
+                  ? "No VIP projects yet"
+                  : "Catalog is empty"}
           </h2>
           <p>
             {activeTab === "saved"
-              ? "Сохраняй полезные проекты, чтобы быстро возвращаться к ним."
+              ? "Save useful projects so you can return to them quickly."
               : activeTab === "top"
-                ? "Популярные проекты появятся после просмотров и скачиваний."
+                ? "Popular projects will appear after views and downloads."
                 : activeTab === "vip"
-                  ? "Эксклюзивные проекты появятся здесь. Оформи VIP заранее."
-                  : "Первую публикацию можно добавить во вкладке администратора."}
+                  ? "Exclusive projects will appear here. Get VIP access in advance."
+                  : "Add the first publication in the admin tab."}
           </p>
         </section>
       </>
@@ -1638,20 +1638,20 @@ function VipBanner({ account, onVip }) {
       <div>
         <strong>
           <Crown size={18} />
-          {account.isVip ? "VIP активен" : "Платный VIP-раздел"}
+          {account.isVip ? "VIP active" : "Paid VIP section"}
         </strong>
         <p>
           {account.isVip
             ? account.vipUntil
-              ? `Доступ открыт до ${formatDate(account.vipUntil)}.`
-              : "Безлимитный доступ ко всем проектам каталога."
-            : "Эксклюзивные проекты и безлимитные скачивания. Доступ ко всему каталогу."}
+              ? `Access is active until ${formatDate(account.vipUntil)}.`
+              : "Unlimited access to every catalog project."
+            : "Exclusive projects and unlimited downloads. Access to the full catalog."}
         </p>
       </div>
       {!account.isVip && (
         <button type="button" className="primary" onClick={onVip}>
           <Crown size={16} />
-          {account.vipPriceLabel ? `VIP · ${account.vipPriceLabel}` : "Оформить VIP"}
+          {account.vipPriceLabel ? `VIP · ${account.vipPriceLabel}` : "Get VIP"}
         </button>
       )}
     </section>
@@ -1663,7 +1663,7 @@ function AccessBadge({ tier, owned }) {
   return (
     <span className={`accessBadge tier-${tier} ${owned ? "owned" : ""}`}>
       {tier === "vip" ? <Crown size={12} /> : owned ? <BadgeDollarSign size={12} /> : <Lock size={12} />}
-      {owned ? "Куплено" : tierLabels[tier] || tier}
+      {owned ? "Owned" : tierLabels[tier] || tier}
     </span>
   );
 }
@@ -1709,7 +1709,7 @@ function ProjectCard({ project, account, index = 0, onSelect, onFavorite, onPrim
         type="button"
         className={`favoriteButton ${project.isFavorite ? "saved" : ""} ${burst ? "burst" : ""}`}
         onClick={() => onFavorite(project)}
-        aria-label={project.isFavorite ? "Убрать из избранного" : "Сохранить"}
+        aria-label={project.isFavorite ? "Remove from saved" : "Save"}
       >
         <Star size={17} fill="currentColor" />
       </button>
@@ -1749,7 +1749,7 @@ function ProjectCard({ project, account, index = 0, onSelect, onFavorite, onPrim
           </span>
         </div>
 
-        <p>{project.summary || project.description || "Описание появится позже."}</p>
+        <p>{project.summary || project.description || "Description will be added later."}</p>
 
         <div className="chipRow">
           {[
@@ -1769,7 +1769,7 @@ function ProjectCard({ project, account, index = 0, onSelect, onFavorite, onPrim
         <div className="cardActions">
           <button type="button" onClick={() => onSelect(project)}>
             <ExternalLink size={16} />
-            Детали
+            Details
           </button>
           <button type="button" className="primary" onClick={() => onPrimary(project)}>
             {state.action === "download" ? (
@@ -1798,8 +1798,8 @@ function HistoryList({ loading, downloads, onSelect, onDownload }) {
     return (
       <section className="emptyState">
         <History size={26} />
-        <h2>История пустая</h2>
-        <p>После скачивания проекты появятся здесь.</p>
+        <h2>History is empty</h2>
+        <p>Downloaded projects will appear here.</p>
       </section>
     );
   }
@@ -1817,11 +1817,11 @@ function HistoryList({ loading, downloads, onSelect, onDownload }) {
           <div className="rowActions">
             <button type="button" onClick={() => onSelect(item.project)}>
               <ExternalLink size={16} />
-              Детали
+              Details
             </button>
             <button type="button" className="primary" onClick={() => onDownload(item.project, item.versionId, item.fileId)}>
               <Download size={16} />
-              Скачать
+              Download
             </button>
           </div>
         </div>
@@ -1839,8 +1839,8 @@ function NotificationsList({ loading, notifications, projects, onRead, onOpen })
     return (
       <section className="emptyState">
         <Bell size={26} />
-        <h2>Уведомлений нет</h2>
-        <p>Новые версии сохраненных проектов появятся здесь.</p>
+        <h2>No notifications</h2>
+        <p>New versions of saved projects will appear here.</p>
       </section>
     );
   }
@@ -1868,13 +1868,13 @@ function NotificationsList({ loading, notifications, projects, onRead, onOpen })
               {!item.isRead && (
                 <button type="button" onClick={() => onRead(item)}>
                   <Bell size={16} />
-                  Прочитано
+                  Mark read
                 </button>
               )}
               {project && (
                 <button type="button" className="primary" onClick={() => onOpen(project)}>
                   <ExternalLink size={16} />
-                  Открыть
+                  Open
                 </button>
               )}
             </div>
@@ -1932,7 +1932,7 @@ function ProjectDrawer({
               </span>
             </div>
           </div>
-          <button type="button" className="iconButton" onClick={onClose} aria-label="Закрыть">
+          <button type="button" className="iconButton" onClick={onClose} aria-label="Close">
             <X size={20} />
           </button>
         </div>
@@ -1951,10 +1951,10 @@ function ProjectDrawer({
         <PublicSharePanel project={project} creator={project.createdBy} />
 
         <div className="drawerMeta">
-          <Meta icon={<Code2 size={16} />} label={project.languages.join(", ") || "Язык не указан"} />
-          <Meta icon={<Tags size={16} />} label={project.tags.join(", ") || "Без тегов"} />
-          <Meta icon={<FolderKanban size={16} />} label={project.collections.join(", ") || "Без коллекции"} />
-          <Meta icon={<BookOpen size={16} />} label={project.categories.join(", ") || "Без категории"} />
+          <Meta icon={<Code2 size={16} />} label={project.languages.join(", ") || "No language specified"} />
+          <Meta icon={<Tags size={16} />} label={project.tags.join(", ") || "No tags"} />
+          <Meta icon={<FolderKanban size={16} />} label={project.collections.join(", ") || "No collection"} />
+          <Meta icon={<BookOpen size={16} />} label={project.categories.join(", ") || "No category"} />
           <Meta icon={<CalendarDays size={16} />} label={formatDate(project.createdAt)} />
           {project.fileName && (
             <Meta icon={<Download size={16} />} label={`${project.fileName} ${formatBytes(project.fileSize)}`} />
@@ -1964,40 +1964,40 @@ function ProjectDrawer({
         {notice.text && <p className={`notice ${notice.type}`}>{notice.text}</p>}
 
         <section className="detailSection">
-          <h3>Описание</h3>
+          <h3>Description</h3>
           <p className="description">{project.description || project.summary}</p>
         </section>
 
         <InfoGrid project={project} />
 
         <section className="detailSection">
-          <h3>Инструкция установки</h3>
-          <pre className="codeBlock">{project.installation || "Инструкция пока не добавлена."}</pre>
+          <h3>Installation guide</h3>
+          <pre className="codeBlock">{project.installation || "Installation guide has not been added yet."}</pre>
         </section>
 
         <section className="detailSection">
-          <h3>Примеры запуска</h3>
-          <pre className="codeBlock">{project.runExamples || "Примеры запуска пока не добавлены."}</pre>
+          <h3>Run examples</h3>
+          <pre className="codeBlock">{project.runExamples || "Run examples have not been added yet."}</pre>
         </section>
 
         <section className="detailSection">
-          <h3>Превью кода</h3>
-          <pre className="codeBlock">{project.codePreview || "Snippet пока не добавлен."}</pre>
+          <h3>Code preview</h3>
+          <pre className="codeBlock">{project.codePreview || "Snippet has not been added yet."}</pre>
         </section>
 
         <section className="detailSection">
-          <h3>Версии файлов</h3>
+          <h3>File versions</h3>
           <VersionList project={project} onPrimary={onPrimary} />
         </section>
 
         <section className="detailSection">
-          <h3>Дополнительные файлы</h3>
+          <h3>Additional files</h3>
           <FileList project={project} onPrimary={onPrimary} />
         </section>
 
         <section className="detailSection">
           <h3>Changelog</h3>
-          <p className="description">{project.changelog || "Изменения пока не добавлены."}</p>
+          <p className="description">{project.changelog || "No changes have been added yet."}</p>
         </section>
 
         <ProjectLinks project={project} />
@@ -2008,17 +2008,17 @@ function ProjectDrawer({
             <div>
               <strong>
                 {state.tier === "paid"
-                  ? "Платный исходник"
+                  ? "Paid source"
                   : state.tier === "subscription"
-                    ? "Доступ по подписке"
-                    : "Только для VIP"}
+                    ? "Subscription access"
+                    : "VIP only"}
               </strong>
               <p>
                 {state.tier === "paid"
-                  ? `Купите исходник за ${formatPrice(project)}, чтобы скачать файлы.`
+                  ? `Buy the source for ${formatPrice(project)}, to download the files.`
                   : state.tier === "subscription"
-                    ? "Оформите подписку — и проект откроется вместе со всем разделом."
-                    : "Проект доступен в VIP-разделе с безлимитными скачиваниями."}
+                    ? "Subscribe to unlock this project and the whole section."
+                    : "This project is available in the VIP section with unlimited downloads."}
               </p>
             </div>
           </div>
@@ -2027,7 +2027,7 @@ function ProjectDrawer({
         <div className="drawerActions">
           <button type="button" onClick={() => onFavorite(project)}>
             <Star size={17} fill="currentColor" />
-            {project.isFavorite ? "Сохранено" : "Сохранить"}
+            {project.isFavorite ? "Saved" : "Save"}
           </button>
           <button type="button" className="primary" onClick={() => onPrimary(project)}>
             {state.action === "download" ? (
@@ -2039,7 +2039,7 @@ function ProjectDrawer({
             ) : (
               <Rocket size={17} />
             )}
-            {state.unlocked ? "Скачать latest" : state.label}
+            {state.unlocked ? "Download latest" : state.label}
           </button>
           {state.unlocked && (
             <button type="button" onClick={() => onAutoArchive(project)}>
@@ -2052,38 +2052,38 @@ function ProjectDrawer({
         <TelegramShareCard project={project} />
 
         <section className="detailSection">
-          <h3>Заказать доработку</h3>
+          <h3>Order customization</h3>
           <form className="inlineForm" onSubmit={(event) => onRequest(event, project.id)}>
             <input type="hidden" name="type" value="custom" />
-            <textarea name="message" rows={3} required placeholder="Опишите, что нужно доработать или кастомизировать в проекте" />
-            <input name="budget" placeholder="Бюджет, напр. 1500 Stars" />
-            <input name="contact" placeholder="Контакт для связи (@username, почта)" />
+            <textarea name="message" rows={3} required placeholder="Describe what should be improved or customized in this project" />
+            <input name="budget" placeholder="Budget, e.g. 1500 Stars" />
+            <input name="contact" placeholder="Contact (@username, email)" />
             <button type="submit" className="primary">
               <Wrench size={16} />
-              Отправить заявку
+              Send request
             </button>
           </form>
         </section>
 
         <section className="detailSection">
-          <h3>Отзывы</h3>
+          <h3>Reviews</h3>
           <ReviewForm project={project} onReview={onReview} />
           <div className="reviews">
             {project.reviews.length ? (
               project.reviews.map((review) => <ReviewItem review={review} key={review.id} />)
             ) : (
-              <p className="mutedText">Отзывов пока нет.</p>
+              <p className="mutedText">No reviews yet.</p>
             )}
           </div>
         </section>
 
         <section className="detailSection">
           <h3>README.md preview</h3>
-          <pre className="codeBlock">{project.readmePreview || "README будет собран автоматически из описания, установки и требований."}</pre>
+          <pre className="codeBlock">{project.readmePreview || "README will be assembled automatically from description, installation and requirements."}</pre>
         </section>
 
         <section className="detailSection">
-          <h3>Сообщить о проблеме</h3>
+          <h3>Report a problem</h3>
           <ReportForm project={project} onReport={onReport} />
         </section>
       </aside>
@@ -2094,7 +2094,7 @@ function ProjectDrawer({
 function VerifiedBadge({ verified }) {
   if (!verified) return null;
   return (
-    <span className="verifiedBadge" title="Профиль проверен администратором">
+    <span className="verifiedBadge" title="Profile verified by admin">
       <CheckCircle2 size={13} />
       verified
     </span>
@@ -2107,7 +2107,7 @@ function AuthorBadges({ user }) {
     <>
       <VerifiedBadge verified={user.isVerified} />
       {user.isTrusted && (
-        <span className="verifiedBadge trustedBadge" title="Автору доверена автопубликация">
+        <span className="verifiedBadge trustedBadge" title="Author is trusted for auto-publication">
           <ShieldCheck size={13} />
           trusted
         </span>
@@ -2140,12 +2140,12 @@ function ProjectAuthorCard({ creator, onOpen }) {
           {name}
           <AuthorBadges user={creator} />
         </strong>
-        <span>{username ? `@${username}` : "Автор без публичного username"}</span>
+        <span>{username ? `@${username}` : "Author has no public username"}</span>
       </div>
       {username && (
         <button type="button" onClick={() => onOpen?.(username)}>
           <User size={16} />
-          Профиль
+          Profile
         </button>
       )}
     </section>
@@ -2154,8 +2154,8 @@ function ProjectAuthorCard({ creator, onOpen }) {
 
 function PublicSharePanel({ project, creator }) {
   const links = [
-    { label: "Проект", url: publicProjectLink(project.slug) },
-    creator?.username ? { label: "Автор", url: publicUserLink(creator.username) } : null
+    { label: "Project", url: publicProjectLink(project.slug) },
+    creator?.username ? { label: "Author", url: publicUserLink(creator.username) } : null
   ].filter((item) => item?.url);
 
   if (!links.length) return null;
@@ -2167,7 +2167,7 @@ function PublicSharePanel({ project, creator }) {
           {item.label}
           <span>
             <input readOnly value={item.url} onFocus={(event) => event.currentTarget.select()} />
-            <a href={item.url} target="_blank" rel="noreferrer" aria-label={`Открыть ссылку: ${item.label}`}>
+            <a href={item.url} target="_blank" rel="noreferrer" aria-label={`Open link: ${item.label}`}>
               <ExternalLink size={16} />
             </a>
           </span>
@@ -2182,7 +2182,7 @@ function TelegramShareCard({ project }) {
   const text = [
     `${project.title} ${project.version ? `(${project.version})` : ""}`.trim(),
     project.summary || project.description || "",
-    `Цена: ${formatPrice(project)}`,
+    `Price: ${formatPrice(project)}`,
     link
   ].filter(Boolean).join("\n");
 
@@ -2193,7 +2193,7 @@ function TelegramShareCard({ project }) {
           <Send size={16} />
           Telegram share card
         </strong>
-        <p>{project.summary || "Готовая карточка для шеринга проекта в Telegram."}</p>
+        <p>{project.summary || "Ready-to-share project card for Telegram."}</p>
       </div>
       <textarea readOnly rows={4} value={text} onFocus={(event) => event.currentTarget.select()} />
     </section>
@@ -2218,10 +2218,10 @@ function UserProfileDrawer({ profile, onClose, onOpenProject, onReportAuthor }) 
                 {name}
                 <AuthorBadges user={profile} />
               </h2>
-              <p>{profile.username ? `@${profile.username}` : "Публичный username не указан"}</p>
+              <p>{profile.username ? `@${profile.username}` : "Public username is not set"}</p>
             </div>
           </div>
-          <button type="button" className="iconButton" onClick={onClose} aria-label="Закрыть">
+          <button type="button" className="iconButton" onClick={onClose} aria-label="Close">
             <X size={20} />
           </button>
         </div>
@@ -2230,32 +2230,32 @@ function UserProfileDrawer({ profile, onClose, onOpenProject, onReportAuthor }) 
           <span>
             <FolderKanban size={15} />
             <strong>{profile.stats?.projects || 0}</strong>
-            проектов
+            projects
           </span>
           <span>
             <Download size={15} />
             <strong>{profile.stats?.downloads || 0}</strong>
-            скачиваний
+            downloads
           </span>
           <span>
             <Star size={15} fill="currentColor" />
             <strong>{profile.stats?.favorites || 0}</strong>
-            избранных
+            favorites
           </span>
           <span>
             <MessageSquare size={15} />
             <strong>{profile.stats?.reviews || 0}</strong>
-            отзывов
+            reviews
           </span>
         </div>
 
         {publicLink && (
           <section className="sharePanel single">
             <label>
-              Публичная ссылка
+              Public link
               <span>
                 <input readOnly value={publicLink} onFocus={(event) => event.currentTarget.select()} />
-                <a href={publicLink} target="_blank" rel="noreferrer" aria-label="Открыть публичный профиль">
+                <a href={publicLink} target="_blank" rel="noreferrer" aria-label="Open public profile">
                   <ExternalLink size={16} />
                 </a>
               </span>
@@ -2264,7 +2264,7 @@ function UserProfileDrawer({ profile, onClose, onOpenProject, onReportAuthor }) 
         )}
 
         <section className="detailSection">
-          <h3>Проекты автора</h3>
+          <h3>Author projects</h3>
           {profile.projects?.length ? (
             <div className="versionList">
               {profile.projects.map((project) => (
@@ -2272,7 +2272,7 @@ function UserProfileDrawer({ profile, onClose, onOpenProject, onReportAuthor }) 
                   <div>
                     <strong>{project.title}</strong>
                     <span>
-                      {project.version || "latest"} · {formatPrice(project)} · {project.downloadCount || 0} скач.
+                      {project.version || "latest"} · {formatPrice(project)} · {project.downloadCount || 0} downloads
                     </span>
                     <p>{project.summary || project.description}</p>
                   </div>
@@ -2285,29 +2285,29 @@ function UserProfileDrawer({ profile, onClose, onOpenProject, onReportAuthor }) 
                     }}
                   >
                     <ExternalLink size={16} />
-                    Открыть
+                    Open
                   </button>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="mutedText">У автора пока нет опубликованных проектов.</p>
+            <p className="mutedText">This author has no published projects yet.</p>
           )}
         </section>
 
         <section className="detailSection">
-          <h3>Жалоба на автора</h3>
+          <h3>Author report</h3>
           <form className="inlineForm" onSubmit={(event) => onReportAuthor(profile, event)}>
             <select name="reason" defaultValue="abuse">
-              <option value="abuse">Нарушение / обман</option>
-              <option value="malware">Подозрение на вредоносный код</option>
-              <option value="support">Нет поддержки после покупки</option>
-              <option value="other">Другое</option>
+              <option value="abuse">Violation / fraud</option>
+              <option value="malware">Suspected malicious code</option>
+              <option value="support">No support after purchase</option>
+              <option value="other">Other</option>
             </select>
-            <textarea name="details" rows={3} placeholder="Опишите проблему" />
+            <textarea name="details" rows={3} placeholder="Describe the issue" />
             <button type="submit">
               <Flag size={16} />
-              Отправить жалобу
+              Send report
             </button>
           </form>
         </section>
@@ -2318,12 +2318,12 @@ function UserProfileDrawer({ profile, onClose, onOpenProject, onReportAuthor }) 
 
 function InfoGrid({ project }) {
   return (
-    <section className="infoGrid" aria-label="Требования проекта">
-      <InfoItem icon={<Monitor size={16} />} label="ОС" value={project.osSupport || "Не указано"} />
-      <InfoItem icon={<Terminal size={16} />} label="Node.js" value={project.nodeVersion || "Не требуется"} />
-      <InfoItem icon={<Terminal size={16} />} label="Python" value={project.pythonVersion || "Не требуется"} />
-      <InfoItem icon={<Scale size={16} />} label="Лицензия" value={licenseLabels[project.licenseType] || project.licenseType} />
-      <InfoItem icon={<FileCode2 size={16} />} label="Требования" value={project.requirements || "Не указано"} wide />
+    <section className="infoGrid" aria-label="Project requirements">
+      <InfoItem icon={<Monitor size={16} />} label="OS" value={project.osSupport || "Not specified"} />
+      <InfoItem icon={<Terminal size={16} />} label="Node.js" value={project.nodeVersion || "Not required"} />
+      <InfoItem icon={<Terminal size={16} />} label="Python" value={project.pythonVersion || "Not required"} />
+      <InfoItem icon={<Scale size={16} />} label="License" value={licenseLabels[project.licenseType] || project.licenseType} />
+      <InfoItem icon={<FileCode2 size={16} />} label="Requirements" value={project.requirements || "Not specified"} wide />
     </section>
   );
 }
@@ -2342,7 +2342,7 @@ function InfoItem({ icon, label, value, wide = false }) {
 
 function VersionList({ project, onPrimary }) {
   if (!project.versions.length) {
-    return <p className="mutedText">Версии пока не добавлены.</p>;
+    return <p className="mutedText">No versions have been added yet.</p>;
   }
 
   return (
@@ -2350,9 +2350,9 @@ function VersionList({ project, onPrimary }) {
       {project.versions.map((version) => (
         <div className="versionItem" key={version.id}>
           <div>
-            <strong>{version.version || "Без номера"}</strong>
+            <strong>{version.version || "No version number"}</strong>
             <span>
-              {formatDate(version.createdAt)} · {version.downloadCount} скачиваний
+              {formatDate(version.createdAt)} · {version.downloadCount} downloads
               {version.fileName ? ` · ${version.fileName} ${formatBytes(version.fileSize)}` : ""}
             </span>
             <div className="fileMetaLine">
@@ -2365,7 +2365,7 @@ function VersionList({ project, onPrimary }) {
           {version.hasFile && (
             <button type="button" className="primary" onClick={() => onPrimary(project, version.id)}>
               <Download size={16} />
-              Скачать
+              Download
             </button>
           )}
         </div>
@@ -2376,7 +2376,7 @@ function VersionList({ project, onPrimary }) {
 
 function FileList({ project, onPrimary }) {
   if (!project.files?.length) {
-    return <p className="mutedText">Дополнительные файлы пока не добавлены.</p>;
+    return <p className="mutedText">No additional files have been added yet.</p>;
   }
 
   return (
@@ -2384,9 +2384,9 @@ function FileList({ project, onPrimary }) {
       {project.files.map((file) => (
         <div className="versionItem" key={file.id}>
           <div>
-            <strong>{file.fileName || "Файл"}</strong>
+            <strong>{file.fileName || "File"}</strong>
             <span>
-              {formatDate(file.createdAt)} · {file.downloadCount || 0} скачиваний
+              {formatDate(file.createdAt)} · {file.downloadCount || 0} downloads
               {file.fileSize ? ` · ${formatBytes(file.fileSize)}` : ""}
             </span>
             <div className="fileMetaLine">
@@ -2398,7 +2398,7 @@ function FileList({ project, onPrimary }) {
           {file.hasFile && (
             <button type="button" className="primary" onClick={() => onPrimary(project, null, file.id)}>
               <Download size={16} />
-              Скачать
+              Download
             </button>
           )}
         </div>
@@ -2411,15 +2411,15 @@ function ProjectLinks({ project }) {
   const links = [
     { label: "GitHub", url: project.repositoryUrl, icon: <ExternalLink size={17} /> },
     { label: "Demo", url: project.demoUrl, icon: <Play size={17} /> },
-    { label: "Документация", url: project.docsUrl, icon: <BookOpen size={17} /> },
-    { label: "Видео", url: project.videoUrl, icon: <Video size={17} /> }
+    { label: "Docs", url: project.docsUrl, icon: <BookOpen size={17} /> },
+    { label: "Video", url: project.videoUrl, icon: <Video size={17} /> }
   ].filter((item) => item.url);
 
   if (!links.length) return null;
 
   return (
     <section className="detailSection">
-      <h3>Ссылки</h3>
+      <h3>Links</h3>
       <div className="drawerActions">
         {links.map((item) => (
           <a href={item.url} target="_blank" rel="noreferrer" key={item.label}>
@@ -2445,16 +2445,16 @@ function ReviewForm({ project, onReview }) {
   return (
     <form className="inlineForm" onSubmit={(event) => onReview(project, event)}>
       <select name="rating" defaultValue="5">
-        <option value="5">5 звезд</option>
-        <option value="4">4 звезды</option>
-        <option value="3">3 звезды</option>
-        <option value="2">2 звезды</option>
-        <option value="1">1 звезда</option>
+        <option value="5">5 stars</option>
+        <option value="4">4 stars</option>
+        <option value="3">3 stars</option>
+        <option value="2">2 stars</option>
+        <option value="1">1 star</option>
       </select>
-      <textarea name="comment" rows={3} placeholder="Комментарий" />
+      <textarea name="comment" rows={3} placeholder="Comment" />
       <button type="submit" className="primary">
         <MessageSquare size={16} />
-        Отправить отзыв
+        Send review
       </button>
     </form>
   );
@@ -2464,15 +2464,15 @@ function ReportForm({ project, onReport }) {
   return (
     <form className="inlineForm" onSubmit={(event) => onReport(project, event)}>
       <select name="reason" defaultValue="download">
-        <option value="download">Не скачивается</option>
-        <option value="malware">Подозрительный файл</option>
-        <option value="description">Неверное описание</option>
-        <option value="other">Другое</option>
+        <option value="download">Download does not work</option>
+        <option value="malware">Suspicious file</option>
+        <option value="description">Incorrect description</option>
+        <option value="other">Other</option>
       </select>
-      <textarea name="details" rows={3} placeholder="Подробности" />
+      <textarea name="details" rows={3} placeholder="Details" />
       <button type="submit">
         <Flag size={16} />
-        Отправить жалобу
+        Send report
       </button>
     </form>
   );
@@ -2482,7 +2482,7 @@ function ReviewItem({ review }) {
   const author =
     review.author.firstName ||
     review.author.username ||
-    "Пользователь";
+    "User";
 
   return (
     <div className="reviewItem">
@@ -2530,7 +2530,7 @@ function SignatureLink({ url }) {
   if (!url) return null;
   return (
     <a className="signatureLink" href={url} target="_blank" rel="noreferrer">
-      Подпись
+      Signature
     </a>
   );
 }
@@ -2574,14 +2574,14 @@ function AccountPanel({
               </h2>
             </div>
             <p className="mutedText">
-              {user?.username ? `@${user.username}` : "Добавьте username в Telegram, чтобы получить публичную страницу."}
+              {user?.username ? `@${user.username}` : "Add a Telegram username to get a public page."}
             </p>
             {publicLink && (
               <label className="publicLinkField">
-                Публичная ссылка
+                Public link
                 <span>
                   <input readOnly value={publicLink} onFocus={(event) => event.currentTarget.select()} />
-                  <a href={publicLink} target="_blank" rel="noreferrer" aria-label="Открыть публичный профиль">
+                  <a href={publicLink} target="_blank" rel="noreferrer" aria-label="Open public profile">
                     <ExternalLink size={16} />
                   </a>
                 </span>
@@ -2593,7 +2593,7 @@ function AccountPanel({
         <div className="statusCard">
           <div className="sectionTitle">
             <CreditCard size={19} />
-            <h2>Мой доступ</h2>
+            <h2>My access</h2>
           </div>
           <div className="statusGrid">
             <div className={`statusTile ${account.isVip ? "active" : ""}`}>
@@ -2601,27 +2601,27 @@ function AccountPanel({
               <strong>
                 {account.isVip
                   ? account.vipUntil
-                    ? `до ${formatDate(account.vipUntil)}`
-                    : "активен"
-                  : "нет"}
+                    ? `until ${formatDate(account.vipUntil)}`
+                    : "active"
+                  : "none"}
               </strong>
             </div>
             <div className={`statusTile ${account.isSubscriber ? "active" : ""}`}>
-              <span><Rocket size={14} /> Подписка</span>
+              <span><Rocket size={14} /> Subscription</span>
               <strong>
                 {account.isSubscriber && account.subscriptionUntil
-                  ? `до ${formatDate(account.subscriptionUntil)}`
+                  ? `until ${formatDate(account.subscriptionUntil)}`
                   : account.isSubscriber
-                    ? "активна"
-                    : "нет"}
+                    ? "active"
+                    : "none"}
               </strong>
             </div>
             <div className="statusTile">
-              <span><Download size={14} /> Лимит на сегодня</span>
+              <span><Download size={14} /> Daily limit</span>
               <strong>
                 {account.unlimited
-                  ? "безлимит"
-                  : `${account.remaining ?? 0} из ${account.downloadLimit}`}
+                  ? "unlimited"
+                  : `${account.remaining ?? 0} of ${account.downloadLimit}`}
               </strong>
             </div>
           </div>
@@ -2630,45 +2630,45 @@ function AccountPanel({
         <form className="statusCard" onSubmit={onRedeem}>
           <div className="sectionTitle">
             <Ticket size={19} />
-            <h2>Промокод</h2>
+            <h2>Promo code</h2>
           </div>
           <div className="promoRow">
-            <input name="code" required placeholder="Введите промокод" />
+            <input name="code" required placeholder="Enter promo code" />
             <button type="submit" className="primary">
               <Gift size={16} />
-              Активировать
+              Redeem
             </button>
           </div>
-          <p className="mutedText">Промокод может открыть проект, подписку или VIP-доступ.</p>
+          <p className="mutedText">A promo code can unlock a project, subscription or VIP access.</p>
         </form>
 
         <div className="statusCard">
           <div className="sectionTitle">
             <ShoppingBag size={19} />
-            <h2>Купленные проекты</h2>
+            <h2>Purchased projects</h2>
           </div>
           {purchases.length ? (
             <div className="versionList purchaseList">
               {purchases.map((purchase) => (
                 <div className="versionItem purchaseItem" key={purchase.id}>
                   <div>
-                    <strong>{purchase.project?.title || "Проект"}</strong>
+                    <strong>{purchase.project?.title || "Project"}</strong>
                     <span>
-                      {purchase.amountStars || 0} Stars · {purchase.status === "paid" ? "оплачено" : purchase.status} · {formatDate(purchase.createdAt)}
+                      {purchase.amountStars || 0} Stars · {purchase.status === "paid" ? "paid" : purchase.status} · {formatDate(purchase.createdAt)}
                     </span>
-                    <p>{purchase.project?.summary || "Доступ сохранен в аккаунте. Повторная загрузка не требует новой оплаты."}</p>
+                    <p>{purchase.project?.summary || "Access is saved in the account. Re-downloading does not require another payment."}</p>
                   </div>
                   {purchase.project?.slug && (
                     <button type="button" onClick={() => onOpenProject?.(purchase.project)}>
                       <Download size={16} />
-                      Открыть
+                      Open
                     </button>
                   )}
                 </div>
               ))}
             </div>
           ) : (
-            <p className="mutedText">Покупок пока нет. После оплаты проект останется здесь и будет доступен повторно без новой оплаты.</p>
+            <p className="mutedText">No purchases yet. After payment, the project will stay here and remain downloadable without another payment.</p>
           )}
         </div>
 
@@ -2686,13 +2686,13 @@ function AccountPanel({
         <div className="planCard">
           <div className="sectionTitle">
             <Rocket size={19} />
-            <h2>Подписка</h2>
+            <h2>Subscription</h2>
           </div>
-          <p>Безлимитные скачивания и доступ к проектам раздела «Подписка».</p>
-          <div className="planPrice">{account.subscriptionPriceLabel || "по запросу"}</div>
+          <p>Unlimited downloads and access to subscription projects.</p>
+          <div className="planPrice">{account.subscriptionPriceLabel || "on request"}</div>
           <button type="button" className="primary" onClick={onSubscribe} disabled={account.isSubscriber}>
             <Rocket size={16} />
-            {account.isSubscriber ? "Подписка активна" : "Оформить подписку"}
+            {account.isSubscriber ? "Subscription active" : "Subscribe"}
           </button>
         </div>
 
@@ -2701,71 +2701,71 @@ function AccountPanel({
             <Crown size={19} />
             <h2>VIP</h2>
           </div>
-          <p>Весь каталог без ограничений, VIP-раздел и приоритетная поддержка.</p>
-          <div className="planPrice">{account.vipPriceLabel || "по запросу"}</div>
+          <p>The full catalog without limits, VIP section and priority support.</p>
+          <div className="planPrice">{account.vipPriceLabel || "on request"}</div>
           <button type="button" className="primary" onClick={onVip} disabled={account.isVip}>
             <Crown size={16} />
-            {account.isVip ? "VIP активен" : "Получить VIP"}
+            {account.isVip ? "VIP active" : "Get VIP"}
           </button>
         </div>
 
         <form className="statusCard" onSubmit={(event) => onRequest(event)}>
           <div className="sectionTitle">
             <Wrench size={19} />
-            <h2>Заказать разработку</h2>
+            <h2>Order development</h2>
           </div>
           <label>
-            Что нужно
+            What you need
             <select name="type" defaultValue="custom">
-              <option value="custom">Доработка / кастомный проект</option>
-              <option value="source">Купить исходник под задачу</option>
+              <option value="custom">Customization / custom project</option>
+              <option value="source">Buy source code for a task</option>
             </select>
           </label>
-          <textarea name="message" rows={4} required placeholder="Опишите задачу: что нужно сделать, сроки, детали" />
+          <textarea name="message" rows={4} required placeholder="Describe the task: scope, timeline, details" />
           <div className="formGrid">
-            <input name="budget" placeholder="Бюджет" />
-            <input name="contact" placeholder="Контакт (@username)" />
+            <input name="budget" placeholder="Budget" />
+            <input name="contact" placeholder="Contact (@username)" />
           </div>
           <button type="submit" className="primary">
             <Send size={16} />
-            Отправить заявку
+            Send request
           </button>
         </form>
 
         <form className="statusCard submissionForm" onSubmit={onProjectSubmit}>
           <div className="sectionTitle">
             <FolderKanban size={19} />
-            <h2>Выставить свой проект</h2>
+            <h2>Submit your project</h2>
           </div>
-          <p className="mutedText">Проект попадет на проверку администратору. После публикации он появится в каталоге и профиле автора.</p>
+          <p className="mutedText">The project will be sent to admin review. After publication, it will appear in the catalog and author profile.</p>
           <label>
-            Название
+            Title
             <input name="title" required minLength={2} placeholder="Telegram parser kit" />
           </label>
           <label>
-            Slug для ссылки
+            Link slug
             <input name="slug" placeholder="telegram-parser-kit" />
           </label>
           <label>
-            Короткое описание
-            <input name="summary" required placeholder="Что делает проект в одну строку" />
+            Short description
+            <input name="summary" required placeholder="What the project does in one line" />
           </label>
           <label>
-            Полное описание
-            <textarea name="description" rows={4} placeholder="Функции, установка, зависимости, примеры" />
+            Full description
+            <textarea name="description" rows={4} placeholder="Features, installation, dependencies, examples" />
           </label>
           <div className="formGrid">
             <label>
-              Тип доступа
+              Access type
               <select name="accessTier" defaultValue="free">
                 <option value="free">Free</option>
-                <option value="paid">Платный исходник</option>
-                <option value="subscription">По подписке</option>
+                <option value="paid">Paid source</option>
+                <option value="subscription">Subscription</option>
                 <option value="vip">VIP</option>
               </select>
             </label>
             <label>
-              Цена в Stars
+              Price in Stars
               <input name="priceCents" type="number" min="0" step="1" placeholder="0" />
             </label>
           </div>
@@ -2774,29 +2774,29 @@ function AccountPanel({
             <input name="tags" placeholder="bot, parser, api" />
           </div>
           <label>
-            Инструкция установки
+            Installation guide
             <textarea name="installation" rows={3} placeholder="npm install&#10;npm run start" />
           </label>
           <div className="uploadGrid">
             <label className="uploadBox">
               <Upload size={18} />
-              Архив проекта
+              Project archive
               <input name="package" type="file" />
             </label>
             <label className="uploadBox">
               <ImageIcon size={18} />
-              Скриншоты
+              Screenshots
               <input name="screenshots" type="file" accept="image/*" multiple />
             </label>
             <label className="uploadBox">
               <Link2 size={18} />
-              Доп. файлы
+              Extra files
               <input name="files" type="file" multiple />
             </label>
           </div>
           <button type="submit" className="primary">
             <Send size={16} />
-            Отправить на проверку
+            Send for review
           </button>
         </form>
       </div>
@@ -2816,7 +2816,7 @@ function OwnerProjects({
     <div className="statusCard ownerProjects">
       <div className="sectionTitle">
         <FolderKanban size={19} />
-        <h2>Мои проекты</h2>
+        <h2>My projects</h2>
       </div>
       {projects.length ? (
         <div className="ownerProjectList">
@@ -2834,14 +2834,14 @@ function OwnerProjects({
                 {project.slug && (
                   <button type="button" onClick={() => onOpenProject?.(project)}>
                     <ExternalLink size={15} />
-                    Открыть
+                    Open
                   </button>
                 )}
               </div>
 
               <form className="versionForm editProjectForm" onSubmit={(event) => onProjectEdit(project, event)}>
                 <label>
-                  Название
+                  Title
                   <input name="title" required minLength={2} defaultValue={project.title} />
                 </label>
                 <label>
@@ -2849,51 +2849,51 @@ function OwnerProjects({
                   <input name="slug" defaultValue={project.slug} />
                 </label>
                 <label className="wide">
-                  Кратко
+                  Summary
                   <input name="summary" defaultValue={project.summary} />
                 </label>
                 <label className="wide">
-                  Описание
+                  Description
                   <textarea name="description" rows={3} defaultValue={project.description} />
                 </label>
                 <label className="wide">
-                  Установка
+                  Installation
                   <textarea name="installation" rows={3} defaultValue={project.installation} />
                 </label>
                 <label>
-                  Цена в Telegram Stars
+                  Price in Telegram Stars
                   <input name="priceCents" type="number" min="0" step="1" defaultValue={project.priceCents || 0} />
                 </label>
                 <label>
-                  Тип доступа
+                  Access type
                   <select name="accessTier" defaultValue={project.accessTier || "free"}>
                     <option value="free">Free</option>
                     <option value="paid">Paid</option>
-                    <option value="subscription">Подписка</option>
+                    <option value="subscription">Subscription</option>
                     <option value="vip">VIP</option>
                   </select>
                 </label>
                 <label>
-                  Языки
+                  Languages
                   <input name="languages" defaultValue={listValue(project.languages)} />
                 </label>
                 <label>
-                  Теги
+                  Tags
                   <input name="tags" defaultValue={listValue(project.tags)} />
                 </label>
                 <button type="submit" className="primary wide">
                   <Save size={15} />
-                  Сохранить правки
+                  Save changes
                 </button>
               </form>
 
               <form className="versionForm" onSubmit={(event) => onProjectVersion(project, event)}>
                 <input name="version" placeholder="v1.1.0" />
-                <textarea name="changelog" rows={2} placeholder="Что изменилось" />
+                <textarea name="changelog" rows={2} placeholder="What changed" />
                 <input name="package" type="file" />
                 <button type="submit" className="primary">
                   <Upload size={15} />
-                  Загрузить версию
+                  Upload version
                 </button>
               </form>
 
@@ -2902,27 +2902,27 @@ function OwnerProjects({
                   project.screenshots.map((shot) => (
                     <div className="screenshotAdminItem" key={shot.id}>
                       <img src={shot.url} alt="" />
-                      <button type="button" onClick={() => onDeleteScreenshot(project, shot)} aria-label="Удалить скриншот">
+                      <button type="button" onClick={() => onDeleteScreenshot(project, shot)} aria-label="Delete screenshot">
                         <Trash2 size={14} />
                       </button>
                     </div>
                   ))
                 ) : (
-                  <span className="mutedText">Скриншотов пока нет</span>
+                  <span className="mutedText">No screenshots yet</span>
                 )}
               </div>
               <form className="versionForm" onSubmit={(event) => onProjectScreenshots(project, event)}>
                 <input name="screenshots" type="file" accept="image/*" multiple />
                 <button type="submit">
                   <ImageIcon size={15} />
-                  Добавить скриншоты
+                  Add screenshots
                 </button>
               </form>
             </article>
           ))}
         </div>
       ) : (
-        <p className="mutedText">После первой заявки проект появится здесь. Проверенные авторы публикуются автоматически.</p>
+        <p className="mutedText">After your first submission, the project will appear here. Verified authors publish automatically.</p>
       )}
     </div>
   );
@@ -2980,64 +2980,64 @@ function AdminPanel({
       <form className="adminForm" onSubmit={onCreate}>
         <div className="sectionTitle">
           <Plus size={19} />
-          <h2>Новый проект</h2>
+          <h2>New project</h2>
         </div>
 
         {notice.text && <p className={`notice ${notice.type}`}>{notice.text}</p>}
 
         <div className="formGrid">
           <label>
-            Статус
+            Status
             <select name="status" defaultValue="draft">
-              <option value="draft">Черновик</option>
-              <option value="pending">На проверке</option>
-              <option value="published">Опубликовать сразу</option>
-              <option value="hidden">Скрытый проект</option>
+              <option value="draft">Draft</option>
+              <option value="pending">Pending review</option>
+              <option value="published">Publish now</option>
+              <option value="hidden">Hidden project</option>
             </select>
           </label>
           <label>
-            Тип доступа
+            Access type
             <select name="accessTier" defaultValue="free">
-              <option value="free">Free — бесплатно</option>
-              <option value="paid">Paid — купить исходник</option>
-              <option value="subscription">Подписка</option>
-              <option value="vip">VIP-раздел</option>
+              <option value="free">Free</option>
+              <option value="paid">Paid source</option>
+              <option value="subscription">Subscription</option>
+              <option value="vip">VIP section</option>
             </select>
           </label>
         </div>
 
         <label>
-          Название
+          Title
           <input name="title" required minLength={2} placeholder="Telegram parser kit" />
         </label>
 
         <label>
-          Короткое описание
-          <input name="summary" placeholder="Что делает проект в одну строку" />
+          Short description
+          <input name="summary" placeholder="What the project does in one line" />
         </label>
 
         <label>
-          Полное описание
-          <textarea name="description" rows={5} placeholder="Функции, установка, зависимости, примеры" />
+          Full description
+          <textarea name="description" rows={5} placeholder="Features, installation, dependencies, examples" />
         </label>
 
         <label>
-          Инструкция установки
+          Installation guide
           <textarea name="installation" rows={4} placeholder="npm install&#10;cp .env.example .env&#10;npm run start" />
         </label>
 
         <label>
-          Требования и зависимости
+          Requirements and dependencies
           <textarea name="requirements" rows={4} placeholder="PostgreSQL/SQLite, Redis, FFmpeg, API keys..." />
         </label>
 
         <div className="formGrid">
           <label>
-            ОС
+            OS
             <input name="osSupport" placeholder="Linux VPS, Ubuntu 22.04, Windows" />
           </label>
           <label>
-            Лицензия
+            License
             <select name="licenseType" defaultValue="free">
               <option value="free">Free</option>
               <option value="personal">Personal</option>
@@ -3048,62 +3048,62 @@ function AdminPanel({
 
         <div className="formGrid">
           <label>
-            Node.js версия
-            <input name="nodeVersion" placeholder=">=20, >=24, не требуется" />
+            Node.js version
+            <input name="nodeVersion" placeholder=">=20, >=24, not required" />
           </label>
           <label>
-            Python версия
-            <input name="pythonVersion" placeholder=">=3.11, не требуется" />
+            Python version
+            <input name="pythonVersion" placeholder=">=3.11, not required" />
           </label>
         </div>
 
         <label>
-          Примеры запуска
+          Run examples
           <textarea name="runExamples" rows={4} placeholder="node index.js&#10;python main.py --config config.yml" />
         </label>
 
         <label>
-          Превью кода или demo snippet
+          Code preview or demo snippet
           <textarea name="codePreview" rows={6} placeholder="const bot = new Telegraf(process.env.BOT_TOKEN);" />
         </label>
 
         <label>
-          Changelog первой версии
-          <textarea name="changelog" rows={4} placeholder="v1.0.0: первый релиз, что добавлено и исправлено" />
+          First version changelog
+          <textarea name="changelog" rows={4} placeholder="v1.0.0: first release, additions and fixes" />
         </label>
 
         <div className="formGrid">
           <label>
-            Языки
+            Languages
             <input name="languages" placeholder="Node.js, Python, Bash" />
           </label>
           <label>
-            Теги
+            Tags
             <input name="tags" placeholder="bot, parser, api" />
           </label>
         </div>
 
         <div className="formGrid">
           <label>
-            Коллекции
-            <input name="collections" placeholder="Боты, Парсеры, AI" />
+            Collections
+            <input name="collections" placeholder="Bots, Parsers, AI" />
           </label>
           <label>
-            Категории
+            Categories
             <input name="categories" placeholder="Backend, CLI, SaaS, Automation" />
           </label>
         </div>
 
         <div className="formGrid">
           <label>
-            Цена в Telegram Stars
+            Price in Telegram Stars
             <input name="priceCents" type="number" min="0" step="1" placeholder="0" />
           </label>
         </div>
 
         <div className="formGrid">
           <label>
-            Версия
+            Version
             <input name="version" placeholder="v1.0.0" />
           </label>
           <label>
@@ -3125,11 +3125,11 @@ function AdminPanel({
 
         <div className="formGrid">
           <label>
-            Документация
+            Docs
             <input name="docsUrl" type="url" placeholder="https://docs.example.com" />
           </label>
           <label>
-            Видео
+            Video
             <input name="videoUrl" type="url" placeholder="https://youtube.com/..." />
           </label>
         </div>
@@ -3137,83 +3137,83 @@ function AdminPanel({
         <div className="uploadGrid">
           <label className="uploadBox">
             <Upload size={19} />
-            Файл версии
+            Version file
             <input name="package" type="file" />
           </label>
           <label className="uploadBox">
             <ImageIcon size={19} />
-            Скриншоты
+            Screenshots
             <input name="screenshots" type="file" accept="image/*" multiple />
           </label>
           <label className="uploadBox">
             <Link2 size={19} />
-            Доп. файлы
+            Extra files
             <input name="files" type="file" multiple />
           </label>
         </div>
         <p className="mutedText uploadLimitText">
-          Лимит загрузки: до {limits?.maxUploadMb || 100} MB на файл. Архивы получают SHA-256 и подпись автоматически.
+          Upload limit: up to {limits?.maxUploadMb || 100} MB per file. Archives receive SHA-256 and a signature automatically.
         </p>
 
         <button type="submit" className="submitButton">
           <Save size={18} />
-          Сохранить проект
+          Save project
         </button>
       </form>
 
       <div className="adminList">
         <div className="sectionTitle">
           <BarChart3 size={19} />
-          <h2>Управление</h2>
+          <h2>Management</h2>
         </div>
 
         <div className="adminTabs">
           <button type="button" className={mode === "projects" ? "active" : ""} onClick={() => onMode("projects")}>
             <FolderKanban size={16} />
-            Проекты
+            Projects
           </button>
           <button type="button" className={mode === "users" ? "active" : ""} onClick={() => onMode("users")}>
             <Users size={16} />
-            Пользователи
+            Users
           </button>
           <button type="button" className={mode === "reviews" ? "active" : ""} onClick={() => onMode("reviews")}>
             <MessageSquare size={16} />
-            Отзывы
+            Reviews
           </button>
           <button type="button" className={mode === "reports" ? "active" : ""} onClick={() => onMode("reports")}>
             <Flag size={16} />
-            Жалобы
+            Reports
           </button>
           <button type="button" className={mode === "downloads" ? "active" : ""} onClick={() => onMode("downloads")}>
             <Download size={16} />
-            Логи
+            Logs
           </button>
           <button type="button" className={mode === "broadcast" ? "active" : ""} onClick={() => onMode("broadcast")}>
             <Megaphone size={16} />
-            Рассылка
+            Broadcast
           </button>
           <button type="button" className={mode === "money" ? "active" : ""} onClick={() => onMode("money")}>
             <CreditCard size={16} />
-            Монетизация
+            Monetization
           </button>
         </div>
 
         <div className="adminStats">
           <span>
             <Eye size={15} />
-            {totalViews} просмотров
+            {totalViews} views
           </span>
           <span>
             <Download size={15} />
-            {totalDownloads} скачиваний
+            {totalDownloads} downloads
           </span>
           <span>
             <Star size={15} />
-            {totalFavorites} избранных
+            {totalFavorites} favorites
           </span>
           <span>
             <Ban size={15} />
-            {bannedUsers} банов
+            {bannedUsers} bans
           </span>
         </div>
 
@@ -3273,8 +3273,8 @@ function AdminPanel({
         ) : (
           <section className="emptyState compactEmpty">
             <FolderKanban size={24} />
-            <h2>Проектов пока нет</h2>
-            <p>Создай первый черновик слева.</p>
+            <h2>No projects yet</h2>
+            <p>Create the first draft on the left.</p>
           </section>
         )}
       </div>
@@ -3325,19 +3325,19 @@ function AdminProjectCard({
         <div className="adminMetrics">
           <span>
             <Eye size={14} />
-            {project.viewCount || 0} просмотров
+            {project.viewCount || 0} views
           </span>
           <span>
             <Download size={14} />
-            {project.downloadCount || 0} скачиваний
+            {project.downloadCount || 0} downloads
           </span>
           <span>
             <Star size={14} />
-            {project.favoriteCount || 0} избранных
+            {project.favoriteCount || 0} favorites
           </span>
           <span>
             <MessageSquare size={14} />
-            {project.reviewCount || 0} отзывов
+            {project.reviewCount || 0} reviews
           </span>
         </div>
         {(project.fileScanStatus || project.fileSignatureUrl) && (
@@ -3351,79 +3351,79 @@ function AdminProjectCard({
         <div className="adminTool">
           <strong>
             <Megaphone size={15} />
-            Модерация и витрина
+            Moderation and storefront
           </strong>
           <form className="versionForm" onSubmit={(event) => onSale(project, event)}>
-            <input name="percent" type="number" min="0" max="95" step="1" defaultValue={project.salePercent || 0} placeholder="Скидка %" />
+            <input name="percent" type="number" min="0" max="95" step="1" defaultValue={project.salePercent || 0} placeholder="Discount %" />
             <input name="endsAt" type="datetime-local" defaultValue={project.saleEndsAt ? project.saleEndsAt.slice(0, 16).replace(" ", "T") : ""} />
             <button type="submit">
               <BadgeDollarSign size={15} />
-              Скидка Stars
+              Stars sale
             </button>
           </form>
           <form className="versionForm" onSubmit={(event) => onSendAuthorMessage(project, event)}>
-            <input name="title" placeholder="Тема сообщения автору" defaultValue="Нужны правки по проекту" />
-            <textarea name="message" rows={2} required placeholder="Что нужно исправить или уточнить" />
+            <input name="title" placeholder="Author message subject" defaultValue="Project changes required" />
+            <textarea name="message" rows={2} required placeholder="What needs to be fixed or clarified" />
             <button type="submit">
               <Send size={15} />
-              Написать автору
+              Message author
             </button>
           </form>
         </div>
 
         <form className="versionForm editProjectForm" onSubmit={(event) => onEdit(project, event)}>
           <label>
-            Название
+            Title
             <input name="title" required minLength={2} defaultValue={project.title} />
           </label>
           <label>
-            Статус
+            Status
             <select name="status" defaultValue={project.status}>
-              <option value="draft">Черновик</option>
-              <option value="pending">На проверке</option>
-              <option value="published">Опубликован</option>
-              <option value="hidden">Скрыт</option>
-              <option value="archived">Архив</option>
+              <option value="draft">Draft</option>
+              <option value="pending">Pending review</option>
+              <option value="published">Published</option>
+              <option value="hidden">Hidden</option>
+              <option value="archived">Archive</option>
             </select>
           </label>
           <label>
-            Кратко
+            Summary
             <input name="summary" defaultValue={project.summary} />
           </label>
           <label>
-            Версия
+            Version
             <input name="version" defaultValue={project.version} placeholder="v1.1.0" />
           </label>
           <label className="wide">
-            Описание
+            Description
             <textarea name="description" rows={3} defaultValue={project.description} />
           </label>
           <label className="wide">
-            Установка
+            Installation
             <textarea name="installation" rows={3} defaultValue={project.installation} />
           </label>
           <label>
-            Языки
+            Languages
             <input name="languages" defaultValue={listValue(project.languages)} />
           </label>
           <label>
-            Теги
+            Tags
             <input name="tags" defaultValue={listValue(project.tags)} />
           </label>
           <label>
-            Коллекции
+            Collections
             <input name="collections" defaultValue={listValue(project.collections)} />
           </label>
           <label>
-            Категории
+            Categories
             <input name="categories" defaultValue={listValue(project.categories)} />
           </label>
           <label>
-            Цена в Telegram Stars
+            Price in Telegram Stars
             <input name="priceCents" type="number" min="0" step="1" defaultValue={project.priceCents || 0} />
           </label>
           <label>
-            Лицензия
+            License
             <select name="licenseType" defaultValue={project.licenseType}>
               <option value="free">Free</option>
               <option value="personal">Personal</option>
@@ -3431,11 +3431,11 @@ function AdminProjectCard({
             </select>
           </label>
           <label>
-            Тип доступа
+            Access type
             <select name="accessTier" defaultValue={project.accessTier || "free"}>
               <option value="free">Free</option>
               <option value="paid">Paid</option>
-              <option value="subscription">Подписка</option>
+              <option value="subscription">Subscription</option>
               <option value="vip">VIP</option>
             </select>
           </label>
@@ -3452,11 +3452,11 @@ function AdminProjectCard({
             <input name="demoUrl" type="url" defaultValue={project.demoUrl} />
           </label>
           <label>
-            Документация
+            Docs
             <input name="docsUrl" type="url" defaultValue={project.docsUrl} />
           </label>
           <label>
-            Видео
+            Video
             <input name="videoUrl" type="url" defaultValue={project.videoUrl} />
           </label>
           <label className="wide">
@@ -3464,11 +3464,11 @@ function AdminProjectCard({
             <textarea name="changelog" rows={3} defaultValue={project.changelog} />
           </label>
           <label className="wide">
-            Требования
+            Requirements
             <textarea name="requirements" rows={3} defaultValue={project.requirements} />
           </label>
           <label>
-            ОС
+            OS
             <input name="osSupport" defaultValue={project.osSupport} />
           </label>
           <label>
@@ -3480,28 +3480,28 @@ function AdminProjectCard({
             <input name="pythonVersion" defaultValue={project.pythonVersion} />
           </label>
           <label className="wide">
-            Примеры запуска
+            Run examples
             <textarea name="runExamples" rows={3} defaultValue={project.runExamples} />
           </label>
           <label className="wide">
-            Превью кода
+            Code preview
             <textarea name="codePreview" rows={4} defaultValue={project.codePreview} />
           </label>
           <label className="uploadBox wide">
             <Upload size={17} />
-            Заменить файл latest
+            Replace latest file
             <input name="package" type="file" />
           </label>
           <button type="submit" className="primary wide">
             <Save size={15} />
-            Сохранить правки
+            Save changes
           </button>
         </form>
 
         <div className="adminTool">
           <strong>
             <Send size={15} />
-            Версии
+            Versions
           </strong>
           <div className="adminFileList uploadReviewList">
             {project.versions?.length ? (
@@ -3517,16 +3517,16 @@ function AdminProjectCard({
                 />
               ))
             ) : (
-              <span>Версии не добавлены</span>
+              <span>No versions added</span>
             )}
           </div>
           <form className="versionForm" onSubmit={(event) => onVersion(project, event)}>
             <input name="version" placeholder="v1.1.0" />
-            <textarea name="changelog" rows={2} placeholder="Changelog этой версии" />
+            <textarea name="changelog" rows={2} placeholder="Changelog for this version" />
             <input name="package" type="file" />
             <button type="submit" className="primary">
               <Send size={15} />
-              Добавить версию
+              Add version
             </button>
           </form>
         </div>
@@ -3534,7 +3534,7 @@ function AdminProjectCard({
         <div className="adminTool">
           <strong>
             <Link2 size={15} />
-            Дополнительные файлы
+            Additional files
           </strong>
           <div className="adminFileList">
             {project.files?.length ? (
@@ -3550,14 +3550,14 @@ function AdminProjectCard({
                 />
               ))
             ) : (
-              <span>Файлы не добавлены</span>
+              <span>No files added</span>
             )}
           </div>
           <form className="versionForm" onSubmit={(event) => onFiles(project, event)}>
             <input name="files" type="file" multiple />
             <button type="submit">
               <Upload size={15} />
-              Загрузить файлы
+              Upload files
             </button>
           </form>
         </div>
@@ -3565,27 +3565,27 @@ function AdminProjectCard({
         <div className="adminTool">
           <strong>
             <ImageIcon size={15} />
-            Скриншоты
+            Screenshots
           </strong>
           <div className="screenshotAdminGrid">
             {project.screenshots?.length ? (
               project.screenshots.map((shot) => (
                 <div className="screenshotAdminItem" key={shot.id}>
                   <img src={shot.url} alt="" />
-                  <button type="button" onClick={() => onDeleteScreenshot(project, shot)} aria-label="Удалить скриншот">
+                  <button type="button" onClick={() => onDeleteScreenshot(project, shot)} aria-label="Delete screenshot">
                     <Trash2 size={14} />
                   </button>
                 </div>
               ))
             ) : (
-              <span className="mutedText">Скриншотов пока нет</span>
+              <span className="mutedText">No screenshots yet</span>
             )}
           </div>
           <form className="versionForm" onSubmit={(event) => onScreenshots(project, event)}>
             <input name="screenshots" type="file" accept="image/*" multiple />
             <button type="submit">
               <ImageIcon size={15} />
-              Добавить скриншоты
+              Add screenshots
             </button>
           </form>
         </div>
@@ -3594,27 +3594,27 @@ function AdminProjectCard({
       <div className="adminSideActions">
         <button type="button" className="primary" onClick={() => onStatus(project, "published")}>
           <Eye size={16} />
-          Опубликовать
+          Publish
         </button>
         <button type="button" onClick={() => onStatus(project, "draft")}>
           <Edit3 size={16} />
-          В черновик
+          Move to draft
         </button>
         <button type="button" onClick={() => onStatus(project, "hidden")}>
           <EyeOff size={16} />
-          Скрыть
+          Hide
         </button>
         <button type="button" onClick={() => onPin(project)}>
           <Pin size={16} />
-          {project.pinnedAt ? "Открепить" : "Закрепить"}
+          {project.pinnedAt ? "Unpin" : "Pin"}
         </button>
         <button type="button" onClick={() => onWeekly(project)}>
           <Star size={16} />
-          {project.isWeeklyPick ? "Убрать weekly" : "В weekly"}
+          {project.isWeeklyPick ? "Remove weekly" : "Add weekly"}
         </button>
         <button type="button" className="dangerButton" onClick={() => onArchive(project.id)}>
           <Archive size={16} />
-          В архив
+          Archive
         </button>
       </div>
     </div>
@@ -3627,14 +3627,14 @@ function UploadReviewItem({ item, kind, project, onReviewUpload, onToggleUploadH
     <div className={`uploadReviewItem ${item.isHidden ? "hiddenUpload" : ""}`}>
       <div>
         <strong>
-          {kind === "version" ? item.version || "Версия" : item.fileName || "Файл"}
+          {kind === "version" ? item.version || "Version" : item.fileName || "File"}
           <span className={`inlineBadge ${item.reviewStatus === "rejected" ? "danger" : ""}`}>
             {item.reviewStatus || "pending"}
           </span>
           {item.isHidden && <span className="inlineBadge danger">hidden</span>}
         </strong>
         <span>
-          {formatDate(item.createdAt)} · {formatBytes(item.fileSize)} · {item.downloadCount || 0} скач.
+          {formatDate(item.createdAt)} · {formatBytes(item.fileSize)} · {item.downloadCount || 0} downloads
         </span>
         <div className="fileMetaLine">
           <ScanBadge status={item.scanStatus} notes={item.scanNotes} />
@@ -3644,30 +3644,30 @@ function UploadReviewItem({ item, kind, project, onReviewUpload, onToggleUploadH
       </div>
       <form className="reviewChecklist" onSubmit={(event) => onReviewUpload(project, item, kind, event)}>
         <select name="status" defaultValue={item.reviewStatus || "pending"}>
-          <option value="pending">Ожидает</option>
-          <option value="approved">Проверен</option>
-          <option value="changes">Нужны правки</option>
-          <option value="rejected">Отклонен</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="changes">Changes needed</option>
+          <option value="rejected">Rejected</option>
         </select>
-        <label><input name="opens" type="checkbox" defaultChecked={Boolean(checklist.opens)} /> архив</label>
+        <label><input name="opens" type="checkbox" defaultChecked={Boolean(checklist.opens)} /> archive</label>
         <label><input name="readme" type="checkbox" defaultChecked={Boolean(checklist.readme)} /> README</label>
         <label><input name="license" type="checkbox" defaultChecked={Boolean(checklist.license)} /> license</label>
         <label><input name="noSecrets" type="checkbox" defaultChecked={Boolean(checklist.noSecrets)} /> no secrets</label>
         <label><input name="dependencies" type="checkbox" defaultChecked={Boolean(checklist.dependencies)} /> deps</label>
-        <textarea name="notes" rows={2} defaultValue={item.reviewNotes || ""} placeholder="Заметки ревью" />
+        <textarea name="notes" rows={2} defaultValue={item.reviewNotes || ""} placeholder="Review notes" />
         <button type="submit" className="primary">
           <ShieldCheck size={14} />
-          Сохранить ревью
+          Save review
         </button>
       </form>
       <div className="rowActions">
         <button type="button" onClick={() => onToggleUploadHidden(project, item, kind)}>
           {item.isHidden ? <Eye size={15} /> : <EyeOff size={15} />}
-          {item.isHidden ? "Показать" : "Скрыть"}
+          {item.isHidden ? "Show" : "Hide"}
         </button>
         <button type="button" className="dangerButton" onClick={() => onDeleteUpload(project, item, kind)}>
           <Trash2 size={15} />
-          Удалить
+          Delete
         </button>
       </div>
     </div>
@@ -3679,8 +3679,8 @@ function AdminUsers({ users, onBanUser, onVerifyUser, onToggleUserBadge }) {
     return (
       <section className="emptyState compactEmpty">
         <Users size={24} />
-        <h2>Пользователей пока нет</h2>
-        <p>Они появятся после входа через WebApp.</p>
+        <h2>No users yet</h2>
+        <p>They will appear after opening the WebApp.</p>
       </section>
     );
   }
@@ -3697,7 +3697,7 @@ function AdminUsers({ users, onBanUser, onVerifyUser, onToggleUserBadge }) {
               {userItem.isBanned && <span className="inlineBadge danger">ban</span>}
             </strong>
             <span>
-              ID {userItem.telegramId} · {userItem.projectCount || 0} проектов · {userItem.downloadCount} скач. · {userItem.favoriteCount} изб. · {userItem.reviewCount} отзыв.
+              ID {userItem.telegramId} · {userItem.projectCount || 0} projects · {userItem.downloadCount} downloads · {userItem.favoriteCount} favorites · {userItem.reviewCount} reviews
             </span>
             {userItem.banReason && <small>{userItem.banReason}</small>}
           </div>
@@ -3708,17 +3708,17 @@ function AdminUsers({ users, onBanUser, onVerifyUser, onToggleUserBadge }) {
               onClick={() => onVerifyUser(userItem)}
             >
               <CheckCircle2 size={15} />
-              {userItem.isVerified ? "Снять галочку" : "Верифицировать"}
+              {userItem.isVerified ? "Remove verification" : "Verify"}
             </button>
             <button type="button" className={userItem.isTrusted ? "primary" : ""} onClick={() => onToggleUserBadge(userItem, "trusted")}>
               <ShieldCheck size={15} />
-              {userItem.isTrusted ? "Trusted" : "Дать trusted"}
+              {userItem.isTrusted ? "Trusted" : "Grant trusted"}
             </button>
             <button type="button" className={userItem.isTopSeller ? "primary" : ""} onClick={() => onToggleUserBadge(userItem, "topSeller")}>
               <BadgeDollarSign size={15} />
               {userItem.isTopSeller ? "Top seller" : "Top seller"}
             </button>
-            <input name="reason" defaultValue={userItem.banReason} placeholder="Причина бана" />
+            <input name="reason" defaultValue={userItem.banReason} placeholder="Ban reason" />
             <button
               type="submit"
               name="banned"
@@ -3726,7 +3726,7 @@ function AdminUsers({ users, onBanUser, onVerifyUser, onToggleUserBadge }) {
               className={userItem.isBanned ? "primary" : "dangerButton"}
             >
               <Ban size={15} />
-              {userItem.isBanned ? "Разбанить" : "Забанить"}
+              {userItem.isBanned ? "Unban" : "Ban"}
             </button>
           </form>
         </div>
@@ -3740,8 +3740,8 @@ function AdminReviews({ reviews, onModerateReview, onDeleteReview }) {
     return (
       <section className="emptyState compactEmpty">
         <MessageSquare size={24} />
-        <h2>Отзывов пока нет</h2>
-        <p>Отзывы пользователей появятся здесь для модерации.</p>
+        <h2>No reviews yet</h2>
+        <p>User reviews will appear here for moderation.</p>
       </section>
     );
   }
@@ -3762,17 +3762,17 @@ function AdminReviews({ reviews, onModerateReview, onDeleteReview }) {
             {review.status === "hidden" ? (
               <button type="button" className="primary" onClick={() => onModerateReview(review, "published")}>
                 <Eye size={15} />
-                Опубликовать
+                Publish
               </button>
             ) : (
               <button type="button" onClick={() => onModerateReview(review, "hidden")}>
                 <EyeOff size={15} />
-                Скрыть
+                Hide
               </button>
             )}
             <button type="button" className="dangerButton" onClick={() => onDeleteReview(review)}>
               <Trash2 size={15} />
-              Удалить
+              Delete
             </button>
           </div>
         </div>
@@ -3786,8 +3786,8 @@ function AdminReports({ reports, onReportStatus }) {
     return (
       <section className="emptyState compactEmpty">
         <Flag size={24} />
-        <h2>Жалоб пока нет</h2>
-        <p>Сообщения о вредоносном коде и проблемах проекта появятся здесь.</p>
+        <h2>No reports yet</h2>
+        <p>Malware and project issue reports will appear here.</p>
       </section>
     );
   }
@@ -3802,7 +3802,7 @@ function AdminReports({ reports, onReportStatus }) {
           <div>
             <strong>
               {report.subjectType === "author"
-                ? `Автор: ${displayUserName(report.targetAuthor)}`
+                ? `Author: ${displayUserName(report.targetAuthor)}`
                 : report.project.title}
               <span className={`inlineBadge ${report.reason === "malware" ? "danger" : ""}`}>
                 {reportReasonLabels[report.reason] || report.reason}
@@ -3813,22 +3813,22 @@ function AdminReports({ reports, onReportStatus }) {
               </span>
             </strong>
             <span>
-              Отправил: {displayUserName(report.author)} · ID {report.author.telegramId} · {formatDate(report.createdAt)}
+              Reported by: {displayUserName(report.author)} · ID {report.author.telegramId} · {formatDate(report.createdAt)}
             </span>
             {report.subjectType === "author" && report.targetAuthor?.telegramId && (
-              <small>На автора: ID {report.targetAuthor.telegramId}</small>
+              <small>Target author: ID {report.targetAuthor.telegramId}</small>
             )}
             {report.details && <p>{report.details}</p>}
           </div>
           <div className="rowActions">
             <button type="button" onClick={() => onReportStatus(report, "reviewing")}>
-              Проверяется
+              In review
             </button>
             <button type="button" className="primary" onClick={() => onReportStatus(report, "resolved")}>
-              Решена
+              Resolved
             </button>
             <button type="button" className="dangerButton" onClick={() => onReportStatus(report, "rejected")}>
-              Отклонить
+              Reject
             </button>
           </div>
         </div>
@@ -3842,8 +3842,8 @@ function AdminDownloads({ downloads }) {
     return (
       <section className="emptyState compactEmpty">
         <Download size={24} />
-        <h2>Скачиваний пока нет</h2>
-        <p>Когда пользователи начнут скачивать файлы, здесь появится журнал.</p>
+        <h2>No downloads yet</h2>
+        <p>When users start downloading files, the log will appear here.</p>
       </section>
     );
   }
@@ -3863,9 +3863,9 @@ function AdminDownloads({ downloads }) {
                 {displayUserName(item.user)} · ID {item.user.telegramId} · {formatDate(item.createdAt)}
               </span>
               <small>
-                Файл: {target}
-                {item.versionId ? ` · версия #${item.versionId}` : ""}
-                {item.fileId ? ` · доп. файл #${item.fileId}` : ""}
+                File: {target}
+                {item.versionId ? ` · version #${item.versionId}` : ""}
+                {item.fileId ? ` · extra file #${item.fileId}` : ""}
               </small>
             </div>
           </div>
@@ -3880,35 +3880,35 @@ function BroadcastPanel({ onBroadcast }) {
     <form className="adminTool broadcastForm" onSubmit={onBroadcast}>
       <strong>
         <Megaphone size={16} />
-        Рассылка всем пользователям
+        Broadcast to all users
       </strong>
       <label>
-        Заголовок
-        <input name="title" required placeholder="Новая подборка проектов" />
+        Title
+        <input name="title" required placeholder="New project collection" />
       </label>
       <label>
-        Сообщение
-        <textarea name="message" rows={5} required placeholder="Текст, который уйдет в уведомления и Telegram-бота." />
+        Message
+        <textarea name="message" rows={5} required placeholder="Text sent to notifications and the Telegram bot." />
       </label>
       <button type="submit" className="primary">
         <Send size={16} />
-        Отправить рассылку
+        Send broadcast
       </button>
     </form>
   );
 }
 
 const requestTypeLabels = {
-  source: "Исходник",
-  custom: "Доработка",
-  subscription: "Подписка",
+  source: "Source",
+  custom: "Customization",
+  subscription: "Subscription",
   vip: "VIP"
 };
 const requestStatusLabels = {
-  new: "Новая",
-  in_progress: "В работе",
-  done: "Готово",
-  rejected: "Отклонена"
+  new: "New",
+  in_progress: "In progress",
+  done: "Done",
+  rejected: "Rejected"
 };
 
 function AdminMoney({
@@ -3928,53 +3928,53 @@ function AdminMoney({
       <form className="adminTool" onSubmit={onGrant}>
         <strong>
           <Crown size={16} />
-          Выдать доступ вручную
+          Grant access manually
         </strong>
         <div className="formGrid">
-          <input name="telegramId" required placeholder="Telegram ID пользователя" />
+          <input name="telegramId" required placeholder="User Telegram ID" />
           <select name="kind" defaultValue="vip">
             <option value="vip">VIP</option>
-            <option value="subscription">Подписка</option>
+            <option value="subscription">Subscription</option>
           </select>
         </div>
-        <input name="days" type="number" min="0" placeholder="Дней (0 = бессрочно для VIP)" />
+        <input name="days" type="number" min="0" placeholder="Days (0 = permanent for VIP)" />
         <button type="submit" className="primary">
           <Gift size={15} />
-          Выдать доступ
+          Grant access
         </button>
       </form>
 
       <form className="adminTool" onSubmit={onCreatePromo}>
         <strong>
           <Ticket size={16} />
-          Новый промокод
+          New promo code
         </strong>
         <div className="formGrid">
-          <input name="code" required placeholder="Код, напр. WELCOME" />
+          <input name="code" required placeholder="Code, e.g. WELCOME" />
           <select name="type" defaultValue="project">
-            <option value="project">На проект</option>
-            <option value="subscription">Подписка</option>
+            <option value="project">Project access</option>
+            <option value="subscription">Subscription</option>
             <option value="vip">VIP</option>
           </select>
         </div>
         <div className="formGrid">
-          <input name="projectId" type="number" min="1" placeholder="ID проекта (для типа «На проект»)" />
-          <input name="days" type="number" min="0" placeholder="Дней (подписка/VIP)" />
+          <input name="projectId" type="number" min="1" placeholder="Project ID (for project access)" />
+          <input name="days" type="number" min="0" placeholder="Days (subscription/VIP)" />
         </div>
         <div className="formGrid">
-          <input name="maxUses" type="number" min="0" placeholder="Лимит активаций (0 = ∞)" />
-          <input name="expiresAt" placeholder="Истекает: 2026-12-31" />
+          <input name="maxUses" type="number" min="0" placeholder="Redemption limit (0 = ∞)" />
+          <input name="expiresAt" placeholder="Expires: 2026-12-31" />
         </div>
         <button type="submit" className="primary">
           <Plus size={15} />
-          Создать промокод
+          Create promo code
         </button>
       </form>
 
       <div className="adminTool">
         <strong>
           <Ticket size={16} />
-          Промокоды
+          Promo codes
         </strong>
         <div className="listPanel adminSimpleList">
           {promo.length ? (
@@ -3988,23 +3988,23 @@ function AdminMoney({
                   </strong>
                   <span>
                     {code.projectTitle ? `${code.projectTitle} · ` : ""}
-                    {code.days ? `${code.days} дн. · ` : ""}
-                    {code.usedCount}/{code.maxUses || "∞"} активаций
-                    {code.expiresAt ? ` · до ${code.expiresAt}` : ""}
+                    {code.days ? `${code.days} days · ` : ""}
+                    {code.usedCount}/{code.maxUses || "∞"} redemptions
+                    {code.expiresAt ? ` · until ${code.expiresAt}` : ""}
                   </span>
                 </div>
                 {code.isActive && (
                   <div className="rowActions">
                     <button type="button" className="dangerButton" onClick={() => onDeactivatePromo(code)}>
                       <Ban size={15} />
-                      Отключить
+                      Disable
                     </button>
                   </div>
                 )}
               </div>
             ))
           ) : (
-            <p className="mutedText">Промокодов пока нет.</p>
+            <p className="mutedText">No promo codes yet.</p>
           )}
         </div>
       </div>
@@ -4012,7 +4012,7 @@ function AdminMoney({
       <div className="adminTool">
         <strong>
           <Wrench size={16} />
-          Заявки на разработку и исходники
+          Development and source requests
         </strong>
         <div className="listPanel adminSimpleList">
           {requests.length ? (
@@ -4026,26 +4026,26 @@ function AdminMoney({
                   <span>
                     {request.userName} · ID {request.telegramId}
                     {request.projectTitle ? ` · ${request.projectTitle}` : ""}
-                    {request.budget ? ` · бюджет ${request.budget}` : ""}
+                    {request.budget ? ` · budget ${request.budget}` : ""}
                   </span>
                   {request.message && <p>{request.message}</p>}
-                  {request.contact && <small>Контакт: {request.contact}</small>}
+                  {request.contact && <small>Contact: {request.contact}</small>}
                 </div>
                 <div className="rowActions">
                   <button type="button" onClick={() => onRequestStatus(request, "in_progress")}>
-                    В работу
+                    Start work
                   </button>
                   <button type="button" className="primary" onClick={() => onRequestStatus(request, "done")}>
-                    Готово
+                    Done
                   </button>
                   <button type="button" className="dangerButton" onClick={() => onRequestStatus(request, "rejected")}>
-                    Отклонить
+                    Reject
                   </button>
                 </div>
               </div>
             ))
           ) : (
-            <p className="mutedText">Заявок пока нет.</p>
+            <p className="mutedText">No requests yet.</p>
           )}
         </div>
       </div>
@@ -4053,7 +4053,7 @@ function AdminMoney({
       <div className="adminTool">
         <strong>
           <CreditCard size={16} />
-          Покупки {pendingPurchases.length ? `· ${pendingPurchases.length} ждут подтверждения` : ""}
+          Purchases {pendingPurchases.length ? `· ${pendingPurchases.length} pending confirmation` : ""}
         </strong>
         <div className="listPanel adminSimpleList">
           {purchases.length ? (
@@ -4063,7 +4063,7 @@ function AdminMoney({
                   <strong>
                     {purchase.projectTitle}
                     <span className={`inlineBadge ${purchase.status === "pending" ? "danger" : ""}`}>
-                      {purchase.status === "pending" ? "ожидает" : "оплачено"}
+                      {purchase.status === "pending" ? "pending" : "paid"}
                     </span>
                   </strong>
                   <span>
@@ -4075,14 +4075,14 @@ function AdminMoney({
                   <div className="rowActions">
                     <button type="button" className="primary" onClick={() => onConfirmPurchase(purchase)}>
                       <CreditCard size={15} />
-                      Подтвердить
+                      Confirm
                     </button>
                   </div>
                 )}
               </div>
             ))
           ) : (
-            <p className="mutedText">Покупок пока нет.</p>
+            <p className="mutedText">No purchases yet.</p>
           )}
         </div>
       </div>
